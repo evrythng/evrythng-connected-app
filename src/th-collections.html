@@ -1,0 +1,56 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="./th-collection-details.html">
+
+<dom-module id="th-collections">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        max-width: 700px;
+      }
+    </style>
+
+    <app-route
+      route="{{route}}"
+      pattern="/:id"
+
+      data="{{routeData}}"
+      active="{{detailsActive}}"
+    ></app-route>
+
+    <container class="card">
+      <evt-collection-list id="list"
+                           hidden$="{{detailsActive}}"
+                           user="{{user}}"
+                           on-item-selected="_onCollectionSelected"></evt-collection-list>
+      <th-collection-details hidden$="{{!detailsActive}}" user="{{user}}" collection-id="{{routeData.id}}" route="{{route}}"></th-collection-details>
+    </container>
+
+
+  </template>
+
+  <script>
+    Polymer({
+      is: 'th-collections',
+
+      observers: [
+        '_onPathChanged(route.path)'
+      ],
+
+      _onCollectionSelected: function(e) {
+        var thng = e.detail;
+
+        if (thng && thng.id) {
+          this.set('route.path', thng.id);
+        }
+      },
+
+      _onPathChanged: function() {
+        this.$.list.$.list.fire('iron-resize');
+      }
+    });
+  </script>
+</dom-module>

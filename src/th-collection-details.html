@@ -1,0 +1,71 @@
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/neon-animation/neon-animation.html">
+<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+
+<dom-module id="th-collection-details">
+  <template>
+    <style>
+      :host {
+        display: block;
+
+        max-width: 700px;
+      }
+    </style>
+
+    <paper-icon-button icon="arrow-back" on-tap="_close"></paper-icon-button>
+    <span class="layout flex">{{collection.name}}</span>
+
+    <evt-collection-full collection="{{collection}}"></evt-collection-full>
+
+    <paper-toast id="loadingFailed" text="Failed to load requested collection"></paper-toast>
+  </template>
+  <script>
+    Polymer({
+
+      is: 'th-collection-details',
+
+      properties: {
+        collectionId: {
+          type: String
+        },
+
+        user: {
+          type: Object
+        }
+      },
+
+      behaviors: [
+        EvtElements.behaviors.loader
+      ],
+
+      observers: [
+        'refresh(user, collectionId)'
+      ],
+
+      _close: function() {
+        this.set('route.path', '');
+      },
+
+      refresh: function() {
+        var scope = this;
+
+        if (this.user && this.collectionId) {
+          scope.set('loading', true);
+
+          this.user.collection(this.collectionId)
+            .read()
+            .then(function(collection) {
+              scope.collection = collection;
+            })
+            .catch(function() {
+              scope.$.loadingFailed.open();
+            })
+            .then(function() {
+              scope.set('loading', false);
+            });
+        }
+      }
+
+    });
+  </script>
+</dom-module>

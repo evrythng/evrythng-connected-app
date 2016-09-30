@@ -1,0 +1,125 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-styles/paper-styles.html">
+
+<!-- shared styles for all views -->
+<dom-module id="shared-styles">
+  <template>
+    <style>
+      :root {
+        --app-unit-sm: 8px;
+        --app-unit-md: 16px;
+        --app-unit-lg: 32px;
+        --app-unit-xl: 64px;
+
+        --app-header-color: var(--paper-grey-50);
+        --app-drawer-color: var(--paper-grey-800);
+        --app-drawer-item-height: 40px;
+
+        --app-circle: {
+          border-radius: 50%;
+        };
+
+        --app-layout-fit-drawer: {
+          width: 100%;
+          height: 100%;
+
+          display: block;
+        };
+
+        --app-drawer-dark-theme: {
+          color: var(--dark-theme-secondary-color);
+          background-color: var(--app-drawer-color);
+        };
+      }
+
+      .card {
+        display: block;
+        margin: 24px;
+        padding: 16px;
+
+        color: #757575;
+        border-radius: 5px;
+        background-color: #fff;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      .circle {
+        display: inline-block;
+
+        width: 64px;
+        height: 64px;
+
+        text-align: center;
+
+        color: #555;
+        border-radius: 50%;
+        background: #ddd;
+
+        font-size: 30px;
+        line-height: 64px;
+      }
+
+      h1 {
+        margin: 16px 0;
+
+        color: #212121;
+
+        font-size: 22px;
+      }
+
+      hr {
+        margin: 2px 0;
+        height: 1px;
+
+        background-color: var(--dark-theme-text-color);
+        opacity: .1;
+        border: 0px solid;
+      }
+
+      .drawer-item {
+        display: block;
+        text-decoration: none;
+
+        font-size: 14px;
+        line-height: 48px;
+        color: var(--dark-theme-secondary-color);
+
+        padding: 0 var(--app-unit-md);
+
+        transition: all .3s ease;
+      }
+
+      .drawer-item.iron-selected,
+      .drawer-item:hover {
+        color: var(--dark-theme-text-color);
+        background-color: var(--dark-theme-background-color);
+      }
+
+      .drawer-item > iron-icon {
+        margin-right: var(--app-unit-md);
+      }
+
+      .th-dropdown-content {
+        @apply(--shadow-elevation-4dp);
+        @apply(--layout-block);
+
+        min-width: 300px;
+        background-color: var(--paper-grey-50);
+      }
+
+      .th-dropdown-content iron-icon {
+        margin-right: var(--app-unit-md);
+      }
+    </style>
+  </template>
+</dom-module>

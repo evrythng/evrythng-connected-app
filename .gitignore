@@ -35,3 +35,18 @@ jspm_packages
 
 # Optional REPL history
 .node_repl_history
+
+# Re-installable components from bower registry
+bower_components/
+
+# Temporary production files
+build/
+
+# NPM registry packets
+node_modules/
+
+# IDE configuration
+.idea/
+
+# Github project templates
+.github/

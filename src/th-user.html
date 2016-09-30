@@ -1,0 +1,144 @@
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-dropdown/iron-dropdown.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+
+<link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="../bower_components/paper-styles/typography.html">
+
+<link rel="import" href="../bower_components/neon-animation/animations/fade-in-animation.html">
+<link rel="import" href="../bower_components/neon-animation/animations/fade-out-animation.html">
+<link rel="import" href="expand-animation.html">
+
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="th-user">
+  <template>
+    <style include="iron-flex shared-styles">
+      :root {
+        --user-avatar: {
+          @apply(--app-circle);
+
+          width: var(--app-unit-lg);
+          height: var(--app-unit-lg);
+          background-color: var(--paper-grey-800);
+        }
+      }
+
+      :host {
+        padding: var(--app-unit-md);
+      }
+
+      container {
+        @apply(--layout-horizontal);
+      }
+
+      iron-image {
+        @apply(--user-avatar);
+      }
+
+      .th-user-name {
+        @apply(--layout-self-center);
+        @apply(--paper-font-body1);
+
+        margin-right: var(--app-unit-sm);
+
+        font-weight: lighter;
+        text-transform: uppercase;
+      }
+
+      .initials {
+        @apply(--user-avatar);
+        @apply(--layout-horizontal);
+        @apply(--layout-center-center);
+        @apply(--paper-font-body1);
+
+        font-weight: bolder;
+        color: var(--paper-grey-50);
+      }
+    </style>
+
+    <container on-tap="open">
+      <span class="th-user-name">{{fullName}}</span>
+
+      <iron-image hidden$="{{!_hasPhoto(user)}}" src="{{photo}}" sizing="cover"></iron-image>
+      <div hidden$="{{_hasPhoto(user)}}" class="initials">{{initials}}</div>
+
+      <paper-ripple></paper-ripple>
+    </container>
+
+    <iron-dropdown id="dropdown" vertical-align="top" horizontal-align="right"
+                   open-animation-config="[[openAnimationConfig]]"
+                   close-animation-config="[[closeAnimationConfig]]">
+      <paper-listbox class="th-dropdown-content dropdown-content">
+        <paper-item on-tap="_logout">
+          <iron-icon icon="th:logout"></iron-icon><span>Logout</span>
+        </paper-item>
+      </paper-listbox>
+    </iron-dropdown>
+
+  </template>
+  <script>
+    Polymer({
+      is: 'th-user',
+
+      behaviors: [
+        EvtElements.behaviors.user
+      ],
+
+      properties: {
+        openAnimationConfig: {
+          type: Array,
+          value: function() {
+            return [{
+              name: 'fade-in-animation',
+              timing: {
+                delay: 150,
+                duration: 50
+              }
+            }, {
+              name: 'expand-animation',
+              timing: {
+                delay: 150,
+                duration: 200
+              }
+            }];
+          }
+        },
+        closeAnimationConfig: {
+          type: Array,
+          value: function() {
+            return [{
+              name: 'fade-out-animation',
+              timing: {
+                duration: 200
+              }
+            }];
+          }
+        }
+      },
+
+      dropdownOffsets: {
+        vertical: 16,
+        horizontal: 8
+      },
+
+      open: function() {
+        var dropdown = this.$.dropdown;
+
+        dropdown.sizingTarget = dropdown;
+        dropdown.verticalOffset = this.dropdownOffsets.vertical;
+        dropdown.horizontalOffset = this.dropdownOffsets.horizontal;
+        dropdown.open();
+      },
+
+      _logout: function(e) {
+        this.$.dropdown.close();
+        this.fire('logout');
+      },
+
+      _hasPhoto: function(user) {
+        return Boolean(user && user.photo);
+      }
+    });
+  </script>
+</dom-module>

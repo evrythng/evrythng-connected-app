@@ -1,0 +1,307 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-localstorage/iron-localstorage.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-route/app-location.html">
+<link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-pages/iron-pages.html">
+<link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="../bower_components/evt-elements/evt-elements.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="th-iconset.html">
+<link rel="import" href="th-login.html">
+<link rel="import" href="th-user.html">
+
+<script src="../bower_components/lodash/lodash.js"></script>
+
+<dom-module id="th-app">
+  <template>
+    <style include="iron-flex shared-styles">
+
+      :host {
+        --primary-color: var(--paper-grey-900);
+        --secondary-color: black;
+
+        display: block;
+      }
+
+      app-header {
+        @apply(--shadow-elevation-2dp);
+        background-color: var(--app-header-color);
+      }
+
+      app-drawer > container {
+        @apply(--app-layout-fit-drawer);
+        @apply(--app-drawer-dark-theme);
+        @apply(--shadow-elevation-12dp);
+
+        background-color: var(--app-drawer-color);
+      }
+
+      app-drawer > container section {
+        margin-bottom: var(--app-unit-sm);
+      }
+
+      app-drawer > container section > label {
+        font-size: var(--app-unit-sm);
+      }
+
+      app-drawer evt-powered-by {
+        position: absolute;
+        bottom: 140px;
+      }
+
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: white;
+      }
+
+      .target-environment {
+        @apply(--layout-horizontal);
+      }
+
+      .target-environment > span {
+        @apply(--layout-flex);
+      }
+
+      .target-environment > iron-icon {
+        @apply(--layout-self-center);
+      }
+
+      .header-logo {
+        padding: var(--app-unit-md);
+      }
+
+      .header-logo evt-logo {
+        height: var(--app-unit-xl);
+      }
+    </style>
+
+    <evt-app id="app" settings="[[settings]]" app="{{app}}" user="{{user}}" facebook ws hub></evt-app>
+
+    <iron-localstorage name="th-settings" value="{{settings}}" on-iron-localstorage-load-empty="_setDefaultSettings"></iron-localstorage>
+
+    <app-drawer-layout fullbleed hidden$="[[!_isReady(app, user)]]">
+      <app-location route="{{route}}"></app-location>
+      <app-route
+        route="{{route}}"
+        pattern="/:page"
+        data="{{routeData}}"
+        tail="{{subroute}}"></app-route>
+
+      <!-- Drawer content -->
+      <app-drawer>
+        <container>
+
+          <section class="header-logo">
+            <evt-logo mode="inverted"></evt-logo>
+          </section>
+          <hr>
+
+          <section>
+            <iron-selector selected="[[page]]" attr-for-selected="name" role="navigation">
+              <a class="drawer-item" name="thngs" href="/thngs">
+                <iron-icon icon="evt:thng"></iron-icon><span>Thngs</span>
+              </a>
+              <a class="drawer-item" name="collections" href="/collections">
+                <iron-icon icon="evt:collection"></iron-icon><span>Collections</span>
+              </a>
+
+              <hr>
+              <a class="drawer-item" name="settings" href="/settings">
+                <iron-icon icon="settings"></iron-icon><span>Settings</span>
+              </a>
+            </iron-selector>
+          </section>
+
+          <section>
+            <span class="drawer-item target-environment" on-tap="_toggleTargetEnvironment">
+              <iron-icon id="targetEnvironmentIcon"></iron-icon>
+              <span>Cloud</span>
+              <paper-toggle-button checked="{{settings.remote}}"></paper-toggle-button>
+            </span>
+          </section>
+
+          <evt-powered-by></evt-powered-by>
+        </container>
+      </app-drawer>
+
+      <!-- Main content -->
+      <app-header-layout has-scrolling-region>
+        <app-header condensed reveals effects="waterfall">
+          <app-toolbar>
+            <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
+            <div main-title>Metahub</div>
+            <span class="flex"></span>
+            <th-user user="{{user}}" on-logout="_logout"></th-user>
+          </app-toolbar>
+        </app-header>
+
+        <iron-pages
+            id="thPages"
+            selected="[[page]]"
+            attr-for-selected="name"
+            fallback-selection="view404"
+            role="main">
+          <th-thngs name="thngs" user="{{user}}" route="{{subroute}}"></th-thngs>
+          <th-collections name="collections" user="{{user}}" route="{{subroute}}"></th-collections>
+          <th-settings name="settings" settings="{{settings}}" route="{{subroute}}"></th-settings>
+          <th-view404 name="view404"></th-view404>
+        </iron-pages>
+      </app-header-layout>
+    </app-drawer-layout>
+
+    <th-login id="loginForm" hidden$="[[_isReady(app, user)]]" loading="{{loading}}" on-login="_onLogin"></th-login>
+  </template>
+
+  <script>
+    Polymer({
+      is: 'th-app',
+
+      properties: {
+        page: {
+          type: String,
+          reflectToAttribute: true,
+          observer: '_onPageChanged'
+        },
+
+        app: Object,
+
+        user: {
+          type: Object,
+          observer: '_onUserChanged'
+        }
+      },
+
+      observers: [
+        '_routePageChanged(routeData.page)',
+        '_onTargetEnvironmentChange(settings.remote)'
+      ],
+
+      behaviors: [
+        EvtElements.behaviors.toaster,
+        EvtElements.behaviors.storage
+      ],
+
+      defaultSettings: {
+        apiKey: '1olb2yZkSav8VXpCu287BtFEG3oXx13eOgZCb0VAilM3jri0Rz3aqzzWMPe6paZMXNDbTPVELL9jzig3',
+
+        apiUrl: 'https://api.evrythng.com',
+        localhostApiUrl: 'http://192.168.0.12:8080',
+
+        wsApiUrl: 'wss://ws.evrythng.com:443/mqtt',
+        wsLocalhostApiUrl: 'ws://localhost:4000/mqtt',
+
+        hubTimeout: 1000,
+        remote: true
+      },
+
+      ready: function() {
+        this.async(function() {
+          var scope = this;
+
+          scope.set('loading', true);
+
+          this.$.app.init()
+            .then(function() {
+              scope.set('loading', false);
+
+              if (!scope.user) {
+                scope.$.loginForm.open();
+              }
+            });
+        });
+      },
+
+      _isReady: function(app, user) {
+        return Boolean(app && user);
+      },
+
+      _onUserChanged: function(user) {
+        this.$.thPages.fire('iron-resize');
+
+        if (user) {
+          this.$.loginForm.close();
+        } else {
+          this.$.loginForm.open();
+        }
+      },
+
+      _routePageChanged: function(page) {
+        this.page = page || 'thngs';
+      },
+
+      _onPageChanged: function(page) {
+        // Load page import on demand. Show 404 page if fails
+        var resolvedPageUrl = this.resolveUrl('th-' + page + '.html');
+
+        this.importHref(resolvedPageUrl, null, this._showPage404, true);
+      },
+
+      _showPage404: function() {
+        this.page = 'view404';
+      },
+
+      _toggleTargetEnvironment: function() {
+        this.set('settings.remote', !this.settings.remote);
+      },
+
+      _onTargetEnvironmentChange: function(isRemoteEnabled) {
+        this.$.targetEnvironmentIcon.icon = isRemoteEnabled ? 'th:cloud-on' : 'th:cloud-off';
+      },
+
+      _onSettingsChange: function(e) {
+        var settings = e.detail;
+        var fields = [ 'apiKey', 'apiUrl', 'localhostUrl', 'wsApiUrl', 'wsLocalhostUrl' ];
+
+        fields.forEach(function(field) {
+          this.set('settings.' + field, settings[field]);
+        }, this);
+
+        this.store.set('th-settings', this.settings);
+      },
+
+      _onLogin: function(e) {
+        this._login(e.detail);
+      },
+
+      _login: function(config) {
+        var scope = this;
+
+        scope.$.app.login(config)
+          .catch(function() {
+            scope.showToast('Failed to login');
+          });
+      },
+
+      _logout: function() {
+        var scope = this;
+
+        scope.$.app.logout()
+          .catch(function() {
+            scope.showToast('Failed to logout');
+          });
+      },
+
+      _setDefaultSettings: function() {
+        this.settings = this.defaultSettings;
+      }
+    });
+  </script>
+</dom-module>
