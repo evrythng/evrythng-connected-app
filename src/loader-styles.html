@@ -1,0 +1,203 @@
+<dom-module id="loader-styles">
+  <template>
+    <style>
+      .th-loader {
+        position: relative;
+        width: 300px;
+        height: 300px;
+        -webkit-align-self: center;
+        -ms-flex-item-align: center;
+        align-self: center;
+      }
+
+      .th-loader .loader-part {
+        position: absolute;
+        top: 25%;
+        left: 25%;
+        opacity: 0;
+        width: 50%;
+        height: 50%;
+        background-color: transparent;
+        -webkit-transition: all .3s ease;
+        transition: all .3s ease;
+        -webkit-transform-origin: 50% 50%;
+        transform-origin: 50% 50%;
+      }
+
+      .th-loader.pin .loader-part-0 {
+        background-color: black;
+        opacity: 1;
+        top: 20%;
+        left: 20%;
+        width: 60%;
+        height: 60%;
+        -webkit-transform: rotate(-45deg);
+        transform: rotate(-45deg);
+        border-radius: 50% 50% 50% 0;
+      }
+      .th-loader.pin .loader-part-1 {
+        opacity: 1;
+        background-color: white;
+        top: 35%;
+        left: 35%;
+        width: 30%;
+        height: 30%;
+        border-radius: 100%;
+      }
+
+      .th-loader.wi-fi .loader-part-0 {
+        background-color: black;
+        opacity: 1;
+        top: 80%;
+        left: 42.5%;
+        width: 15%;
+        height: 15%;
+        border-radius: 50%;
+        -webkit-transition-duration: .6s;
+        transition-duration: .6s;
+      }
+      .th-loader.wi-fi .loader-part-1 {
+        opacity: 1;
+        top: 10%;
+        left: 20%;
+        width: 60%;
+        height: 60%;
+        border-radius: 100% 0 0 0;
+        -webkit-transform: rotate(45deg) scale(1.4);
+        transform: rotate(45deg) scale(1.4);
+        background: -webkit-radial-gradient(bottom right circle, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 30%, #000000 30%, #000000 36%, rgba(0, 0, 0, 0) 35%, rgba(0, 0, 0, 0) 40%, #000000 41%, #000000 46%, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0) 50%, #000000 51%, #000000 56%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0) 100%);
+        background: radial-gradient(circle at bottom right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 30%, #000000 30%, #000000 36%, rgba(0, 0, 0, 0) 35%, rgba(0, 0, 0, 0) 40%, #000000 41%, #000000 46%, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0) 50%, #000000 51%, #000000 56%, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0) 100%);
+      }
+
+      .th-loader.t-shirt .loader-part-0 {
+        background: -webkit-radial-gradient(top center circle, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 15%, #000000 16%, #000000 100%);
+        background: radial-gradient(circle at top center, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0) 15%, #000000 16%, #000000 100%);
+        opacity: 1;
+        top: 30%;
+        left: 30%;
+        width: 40%;
+        height: 60%;
+      }
+      .th-loader.t-shirt .loader-part-2 {
+        background: black;
+        opacity: 1;
+        -webkit-transform-origin: top left;
+        transform-origin: top left;
+        top: 30%;
+        left: 30%;
+        width: 10%;
+        height: 30%;
+        -webkit-transform: rotate(30deg);
+        transform: rotate(30deg);
+        -webkit-transition-duration: .6s;
+        transition-duration: .6s;
+      }
+      .th-loader.t-shirt .loader-part-3 {
+        background: black;
+        opacity: 1;
+        -webkit-transform-origin: top right;
+        transform-origin: top right;
+        top: 30%;
+        left: 60%;
+        width: 10%;
+        height: 30%;
+        -webkit-transform: rotate(-30deg);
+        transform: rotate(-30deg);
+        -webkit-transition-duration: .6s;
+        transition-duration: .6s;
+      }
+
+      .th-loader.fridge .loader-part-0 {
+        opacity: 1;
+        background: black;
+        top: 10%;
+        left: 30%;
+        width: 40%;
+        height: 30%;
+        border-radius: 5px 5px 0 0;
+        -webkit-transition-duration: .6s;
+        transition-duration: .6s;
+      }
+      .th-loader.fridge .loader-part-1 {
+        opacity: 1;
+        background: black;
+        top: 45%;
+        left: 30%;
+        width: 40%;
+        height: 50%;
+        border-radius: 0 0 5px 5px;
+      }
+      .th-loader.fridge .loader-part-2 {
+        opacity: 1;
+        background: black;
+        top: 95%;
+        left: 35%;
+        width: 5%;
+        height: 5%;
+        border-radius: 0 0 5px 5px;
+      }
+      .th-loader.fridge .loader-part-3 {
+        opacity: 1;
+        background: black;
+        top: 95%;
+        left: 60%;
+        width: 5%;
+        height: 5%;
+        border-radius: 0 0 5px 5px;
+      }
+      .th-loader.fridge .loader-part-4 {
+        opacity: 1;
+        background: white;
+        top: 20%;
+        left: 35%;
+        width: 2%;
+        height: 10%;
+        border-radius: 5px;
+        -webkit-transition-duration: .1s;
+        transition-duration: .1s;
+      }
+      .th-loader.fridge .loader-part-5 {
+        opacity: 1;
+        background: white;
+        top: 60%;
+        left: 35%;
+        width: 2%;
+        height: 16%;
+        border-radius: 5px;
+        -webkit-transition-duration: .1s;
+        transition-duration: .1s;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background-color: whitesmoke;
+        box-shadow: 0 0 200px rgba(0, 0, 0, 0.4) inset;
+      }
+
+      .container {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        -webkit-box-orient: horizontal;
+        -webkit-box-direction: normal;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+    </style>
+  </template>
+</dom-module>

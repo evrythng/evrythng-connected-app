@@ -16,11 +16,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <style >
       :root {
-        --app-unit-xs: 4px;
-        --app-unit-sm: 8px;
-        --app-unit-md: 16px;
-        --app-unit-lg: 32px;
-        --app-unit-xl: 64px;
+        --app-unit-base: 8px;
+
+        --app-unit-xs: calc(var(--app-unit-base) * 0.5);
+        --app-unit-sm: calc(var(--app-unit-base) * 1);
+        --app-unit-md: calc(var(--app-unit-base) * 2);
+        --app-unit-lg: calc(var(--app-unit-base) * 4);
+        --app-unit-xl: calc(var(--app-unit-base) * 8);
 
         --app-max-page-width: 700px;
 
@@ -159,6 +161,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         height: var(--app-unit-lg);
       }
 
+      .empty-message {
+        text-align: center;
+      }
+
       .circle {
         @apply(--app-circle);
 
@@ -232,6 +238,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         @apply(--app-circle);
 
         width: var(--app-unit-xl);
+        min-width: var(--app-unit-xl);
         height: var(--app-unit-xl);
         background-color: var(--app-image-placeholder-background);
       }
@@ -239,12 +246,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       .th-entity-name {
         @apply(--paper-font-title);
         @apply(--paper-font-common-nowrap);
+
+        font-size: 1.1em;
       }
 
       .th-entity-id {
         @apply(--paper-font-subhead);
         @apply(--paper-font-common-nowrap);
         @apply(--app-muted);
+
+        font-size: 1em;
       }
 
       .target-environment {

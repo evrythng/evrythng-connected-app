@@ -1,10 +1,12 @@
 <link rel="import" href="../bower_components/iron-image/iron-image.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
 
 <link rel="import" href="../bower_components/paper-styles/typography.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
 
 <link rel="import" href="shared-styles.html">
 
@@ -29,17 +31,15 @@
       margin-right: var(--app-unit-sm);
     }
 
-    .empty-message {
-      text-align: center;
-    }
 
   </style>
   <template>
 
-    <div class="empty-message" hidden$={{_hasAnyThngs(thngs)}}>
+    <div class="empty-message" hidden$={{hasThngs}}>
       <h4>No items found</h4>
     </div>
 
+    <iron-scroll-threshold id="scroller" scroll-target="contentContainer" lower-threshold="100" on-lower-trigger="loadMoreThngs"></iron-scroll-threshold>
     <iron-list items="{{thngs}}" id="list" indexAs="id" selection-enabled>
       <template>
         <paper-item>
@@ -53,6 +53,11 @@
         </paper-item>
       </template>
     </iron-list>
+
+    <div class="empty-message" hidden$="{{!loadingMore}}">
+      <paper-spinner active></paper-spinner>
+    </div>
+
   </template>
   <script>
     Polymer({
@@ -60,8 +65,8 @@
 
       properties: {
 
-        filter: {
-          type: Object,
+        query: {
+          type: String,
           observer: 'refresh'
         },
 
@@ -73,13 +78,18 @@
         user: {
           type: Object,
           observer: 'refresh'
-        }
+        },
 
+        thngs: {
+          type: Array,
+          value: []
+        }
       },
 
       behaviors: [
         TH.behaviors.loader,
         TH.behaviors.showToast,
+        TH.behaviors.scrollTarget,
         TH.behaviors.productCache,
         TH.behaviors.product
       ],
@@ -92,49 +102,87 @@
         'refresh(filter.*)'
       ],
 
+      ready: function() {
+        this.$.scroller.scrollTarget = this.getScrollTarget()
+      },
+
       refresh: function () {
         var scope = this;
 
         if (!scope.loading && scope.user) {
-          scope.set('loading', true);
-          scope.readThngs()
-            .then(function (thngs) {
-              scope.thngs = thngs;
-            })
-            .catch(function() {
-              scope.showToast('Failed to read thngs');
-            })
-            .then(function() {
-              scope.set('loading', false);
-            });
+          scope.set('thngs', []);
+
+          this.initIterator();
+          this.loadMoreThngs();
         }
       },
 
-      readThngs: function() {
+      initIterator: function() {
+        var scope = this;
+        var opts = {};
+
+        if (scope.query) {
+          opts.params = {
+            filter: 'name=' + scope.query + '*'
+          };
+        }
+
+        this.iterator = this.user.thng().iterator(opts);
+      },
+
+      loadMoreThngs: function() {
         var scope = this;
 
-        return this.user.thng().read({
-          params: {
-            filter: scope.filter
-          }
-        })
-          .then(function(thngs) {
-            return Promise.all(
-              thngs.map(function(thng) {
-                if (thng.product) {
-                  return scope._readProduct(thng.product)
-                    .then(function(product) {
-                      thng.product = product;
-                      thng.photo = scope._getProductPhoto(product);
-                    });
-                } else {
-                  return Promise.resolve();
-                }
-              })
-            ).then(function() {
-              return thngs;
-            });
+        scope.set('loadingMore', true);
+        return this.iterator.next()
+          .then(scope.loadChunkReferences.bind(scope))
+          .then(scope.loadToView.bind(scope))
+          .catch(function() {
+            scope.showToast('Failed to load thngs');
+          })
+          .then(function() {
+            scope.set('loadingMore', false);
           });
+      },
+
+      loadChunkReferences: function(chunk) {
+        var scope = this;
+
+        if (!chunk.done) {
+          return Promise.all(
+            chunk.value.map(function(thng) {
+              if (thng.product) {
+                return scope._readProduct(thng.product)
+                  .then(function(product) {
+                    thng.product = product;
+                    thng.photo = scope._getProductPhoto(product);
+                  })
+                  // Lazily handle missing product
+                  .catch(function() {});
+              } else {
+                return Promise.resolve();
+              }
+            })
+          ).then(function() {
+            return chunk.value;
+          });
+        } else {
+          return [];
+        }
+      },
+
+      loadToView: function(thngs) {
+        var scope = this;
+
+        thngs.forEach(function(thng) {
+          scope.push('thngs', thng);
+        });
+
+        scope.$.scroller.clearLower();
+        scope.set('hasThngs', scope.thngs.length > 0);
+        scope.async(function() {
+          scope.$.list.fire('iron-resize');
+        });
       },
 
       _selectionChanged: function(e) {

@@ -22,12 +22,8 @@
     ></app-route>
 
     <paper-material elevation="2">
-      <th-list-filter filter="{{filter}}"></th-list-filter>
-    </paper-material>
-
-    <paper-material elevation="2">
-      <th-collection-list id="list" hidden$="{{detailsActive}}" user="{{user}}" filter="{{filter}}" on-item-selected="_onCollectionSelected"></th-collection-list>
-      <th-collection-details hidden$="{{!detailsActive}}" user="{{user}}" collection-id="{{routeData.id}}" route="{{route}}"></th-collection-details>
+      <th-collection-list id="list" hidden$="{{detailsActive}}" user="{{user}}" filter="{{filter}}" on-item-selected="_onCollectionSelected" query="{{query}}"></th-collection-list>
+      <th-collection-details hidden$="{{!detailsActive}}" user="{{user}}" collection-id="{{collectionId}}" route="{{route}}"></th-collection-details>
     </paper-material>
 
 
@@ -38,11 +34,14 @@
       is: 'th-collections',
 
       properties: {
-        filter: Object
+        query: String
       },
 
       observers: [
-        '_onPathChanged(route.path)'
+        'fireResize(route.*)',
+        'fireResize(routeData.*)',
+
+        '_onIdChanged(routeData.id)'
       ],
 
       _onCollectionSelected: function(e) {
@@ -53,8 +52,18 @@
         }
       },
 
-      _onPathChanged: function() {
+      fireResize: function() {
+        this.debounce('fire-resize', this._fireResize, 20);
+      },
+
+      _fireResize: function() {
         this.$.list.$.list.fire('iron-resize');
+      },
+
+      _onIdChanged: function(newId) {
+        if (this.route.prefix === '/collections') {
+          this.collectionId = newId;
+        }
       }
     });
   </script>

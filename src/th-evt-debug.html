@@ -1,0 +1,56 @@
+<dom-module id="th-evt-debug">
+  <template>
+    <style>
+      :host {
+        @apply(--layout-block);
+        @apply(--layout-fixed-bottom);
+      }
+
+      container {
+        height: 50vh;
+      }
+    </style>
+
+    <container>
+      <h1>Debugger</h1>
+    </container>
+  </template>
+  <script>
+    Polymer({
+      is: 'th-evt-debug',
+
+      ready: function() {
+        if (window.EVT) {
+          this.EVT = window.EVT;
+          this.patchEVT();
+        }
+      },
+
+      patchEVT: function() {
+        var scope = this;
+        var original = EVT.api;
+
+        EVT.api = function(options) {
+          options = options || {};
+          options.interceptors = options.interceptors || [];
+          options.interceptors.push({
+            request: scope.logRequest,
+            response: scope.logResponse
+          });
+
+          return original(options);
+        };
+      },
+
+      logRequest: function(opts) {
+        console.log(opts);
+      },
+
+      logResponse: function(opts) {
+        console.log(opts);
+
+        return opts;
+      }
+    });
+  </script>
+</dom-module>

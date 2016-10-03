@@ -1,16 +1,15 @@
 <link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
 
 <script>
-  TH.behaviors.showToast = {
-    showToast: function (text) {
-      if (!this.toast) {
-        this.toast = document.createElement('paper-toast');
-        this.toast.style.zIndex = 145;
-        Polymer.dom(this.root).appendChild(this.toast);
-      }
+  (function() {
+    var toast = document.createElement('paper-toast');
+    Polymer.dom(document.body).appendChild(toast);
 
-      this.toast.text = text;
-      this.toast.open();
-    }
-  };
+    TH.behaviors.showToast = {
+      showToast: function (text) {
+        toast.text = text;
+        toast.open();
+      }
+    };
+  })();
 </script>

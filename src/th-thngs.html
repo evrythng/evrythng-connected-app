@@ -3,7 +3,6 @@
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="th-thng-list.html">
 <link rel="import" href="th-thng-details.html">
-<link rel="import" href="th-list-filter.html">
 
 <dom-module id="th-thngs">
   <template>
@@ -22,13 +21,9 @@
       active="{{detailsActive}}"
     ></app-route>
 
-    <paper-material elevation="2" hidden$="{{detailsActive}}">
-      <th-list-filter filter="{{filter}}"></th-list-filter>
-    </paper-material>
-
     <paper-material elevation="2">
-      <th-thng-list id="list" hidden$="{{detailsActive}}" user="{{user}}" filter="{{filter}}" on-item-selected="_onThngSelected"></th-thng-list>
-      <th-thng-details hidden$="{{!detailsActive}}" user="{{user}}" thng-id="{{routeData.id}}" route="{{route}}"></th-thng-details>
+      <th-thng-list id="list" hidden$="{{detailsActive}}" user="{{user}}" filter="{{filter}}" on-item-selected="_onThngSelected" query="{{query}}"></th-thng-list>
+      <th-thng-details hidden$="{{!detailsActive}}" user="{{user}}" thng-id="{{thngId}}" route="{{route}}"></th-thng-details>
     </paper-material>
 
   </template>
@@ -38,11 +33,15 @@
       is: 'th-thngs',
 
       properties: {
-        filter: Object
+        query: String,
+        thngId: String
       },
 
       observers: [
-        '_onPathChanged(route.path)'
+        'fireResize(route.path)',
+        'fireResize(routeData.id)',
+
+        '_onIdChanged(routeData.id)'
       ],
 
       _onThngSelected: function(e) {
@@ -53,8 +52,18 @@
         }
       },
 
-      _onPathChanged: function() {
+      fireResize: function() {
+        this.debounce('fire-resize', this._fireResize, 20);
+      },
+
+      _fireResize: function() {
         this.$.list.$.list.fire('iron-resize');
+      },
+
+      _onIdChanged: function(newId) {
+        if (this.route.prefix === '/thngs') {
+          this.thngId = newId;
+        }
       }
     });
   </script>

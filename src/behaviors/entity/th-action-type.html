@@ -1,12 +1,18 @@
 <script>
   TH.behaviors.actionType = [TH.behaviors.actionTypesCache, {
-    //
-
     _getActionTypeDisplayName: function(type) {
       if (type.customFields) {
         return type.customFields.displayName || type.name;
       } else {
         return type.name;
+      }
+    },
+
+    _isBuiltInActionType: function(type) {
+      if (type && type.name) {
+        return type.name.indexOf('_') === 0;
+      } else {
+        return false;
       }
     }
   }]

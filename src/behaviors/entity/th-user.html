@@ -51,15 +51,7 @@
     },
 
     computePhoto: function(user) {
-      var output;
-
-      if (user && user.facebook) {
-        output = this.get('user.facebook.picture.data.url') || '';
-      } else {
-        output = '';
-      }
-
-      return output;
+      return user && user.photo;
     }
   }];
 </script>

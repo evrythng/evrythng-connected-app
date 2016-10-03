@@ -1,0 +1,120 @@
+<link rel="import" href="../bower_components/voice-elements/dist/voice-recognition.html">
+
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="th-toolbar-search">
+  <template>
+    <style include="iron-flex shared-styles">
+      :host {
+        @apply(--layout-block);
+
+        pointer-events: all;
+        color: black;
+      }
+
+      #searchPlate {
+        @apply(--layout-fit);
+        @apply(--layout-horizontal);
+
+        box-sizing: border-box;
+        height: var(--app-unit-xl);
+
+        margin: 0;
+        z-index: 2;
+        transition: all .2s ease;
+        transform: translateY(-200px) scale(1, 0);
+      }
+
+      #searchPlate.visible {
+        transform: translateY(0) scale(1);
+      }
+
+      #searchPlate paper-input {
+        @apply(--layout-flex);
+      }
+    </style>
+
+    <paper-icon-button id="trigger" icon="search"></paper-icon-button>
+
+    <paper-material id="searchPlate" elevation="3">
+      <paper-icon-button id="close" icon="arrow-upward"></paper-icon-button>
+      <paper-input no-label-float label="Search" value="{{raw}}"></paper-input>
+      <paper-icon-button id="clean" icon="close" hidden$="{{!_hasValue(raw)}}"></paper-icon-button>
+      <paper-icon-button id="listen" icon="th:microphone"></paper-icon-button>
+    </paper-material>
+
+    <voice-recognition id="voiceRecognition"></voice-recognition>
+  </template>
+  <script>
+    Polymer({
+      is: 'th-toolbar-search',
+
+      properties: {
+        query: {
+          type: String,
+          notify: true
+        },
+
+        raw: {
+          type: String,
+          observer: 'debounceUpdate'
+        }
+      },
+
+      listeners: {
+        'voiceRecognition.result': 'setRaw'
+      },
+
+      ready: function() {
+        this.async(function() {
+          this.$.trigger.addEventListener('tap', this.openSearch.bind(this));
+          this.$.close.addEventListener('tap', this.closeSearch.bind(this));
+          this.$.listen.addEventListener('tap', this.recognise.bind(this));
+          this.$.clean.addEventListener('tap', this.clean.bind(this));
+        })
+      },
+
+      openSearch: function() {
+        this.$.searchPlate.classList.add('visible');
+      },
+
+      closeSearch: function() {
+        this.$.searchPlate.classList.remove('visible');
+      },
+
+      recognise: function() {
+        this.$.voiceRecognition.start();
+      },
+
+      clean: function() {
+        this.set('raw', '');
+      },
+
+      debounceUpdate: function() {
+        this.debounce('query-update', this._doUpdate, 400);
+      },
+
+      setRaw: function(e) {
+        var query = e.detail.result;
+
+        this.set('raw', query);
+        this.$.voiceRecognition.stop();
+        this.$.voiceRecognition.set('text', '');
+      },
+
+      _doUpdate: function() {
+        this.set('query', this.raw.trim());
+      },
+
+      _hasValue: function(raw) {
+        return Boolean(raw && raw.length);
+      }
+    });
+  </script>
+</dom-module>

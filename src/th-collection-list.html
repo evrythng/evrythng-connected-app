@@ -16,6 +16,7 @@
 
     paper-item {
       @apply(--layout-vertical);
+      @apply(--layout-start);
 
       height: var(--app-unit-xl);
       padding: var(--app-unit-xs);
@@ -48,8 +49,8 @@
 
       properties: {
 
-        filter: {
-          type: Object,
+        query: {
+          type: String,
           observer: 'refresh'
         },
 
@@ -80,10 +81,17 @@
 
       refresh: function () {
         var scope = this;
+        var opts = {};
+
+        if (scope.query) {
+          opts.params = {
+            filter: 'name=' + scope.query + '*'
+          };
+        }
 
         if (!scope.loading && scope.user) {
           scope.set('loading', true);
-          scope.readCollections()
+          scope.user.collection().read(opts)
             .then(function (thngs) {
               scope.collections = thngs;
             })
@@ -92,18 +100,9 @@
             })
             .then(function() {
               scope.set('loading', false);
+              scope.$.list.fire('iron-resize');
             });
         }
-      },
-
-      readCollections: function() {
-        var scope = this;
-
-        return this.user.collection().read({
-          params: {
-            filter: scope.filter
-          }
-        });
       },
 
       _selectionChanged: function(e) {

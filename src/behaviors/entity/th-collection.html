@@ -1,0 +1,9 @@
+<script>
+  TH.behaviors.collection = [TH.behaviors.entity, {
+    name: 'collection',
+
+    _hasAnyThngs: function(collection) {
+      return Boolean(collection && collection.thngs);
+    }
+  }];
+</script>

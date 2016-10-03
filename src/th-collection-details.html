@@ -1,70 +1,352 @@
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-data-table/iron-data-table.html">
+
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-autocomplete/paper-autocomplete.html">
+
 <link rel="import" href="../bower_components/neon-animation/neon-animation.html">
-<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+
+<link rel="import" href="th-chip.html">
+<link rel="import" href="th-object-view.html">
+<link rel="import" href="shared-styles.html">
 
 <dom-module id="th-collection-details">
   <template>
-    <style>
+    <style include="shared-styles iron-flex">
       :host {
         display: block;
 
-        max-width: 700px;
+        max-width: var(--app-max-page-width);
+      }
+
+      h4 {
+        margin: var(--app-unit-xs) 0;
+      }
+
+      .passport {
+        @apply(--layout-vertical);
+        @apply(--layout-start);
+
+        margin: var(--app-unit-xs);
+      }
+
+      .traceable-properties {
+        @apply(--layout-horizontal);
+      }
+
+      .traceable-properties[mobile] {
+        @apply(--layout-vertical);
+      }
+
+      .traceable-properties > * {
+        @apply(--layout-flex);
+
+        margin: var(--app-unit-xs);
+      }
+
+      .custom-fields > * {
+        margin: var(--app-unit-xs);
+      }
+
+      .content-section {
+        padding: var(--app-unit-xs);
+        background-color: var(--app-details-background);
+      }
+
+      .actions {
+        margin: var(--app-unit-xs);
+      }
+
+      .action-type {
+        @apply(--layout-horizontal);
+      }
+
+      .thngs > paper-item {
+        @apply(--layout-horizontal);
       }
     </style>
 
-    <paper-icon-button icon="arrow-back" on-tap="_close"></paper-icon-button>
-    <span class="layout flex">{{collection.name}}</span>
+    <iron-media-query query="(max-width: 600px)" query-matches="{{mobile}}"></iron-media-query>
 
-    <evt-collection-full collection="{{collection}}"></evt-collection-full>
+    <paper-icon-button icon="arrow-back" on-tap="close"></paper-icon-button>
 
-    <paper-toast id="loadingFailed" text="Failed to load requested collection"></paper-toast>
+    <section class="passport">
+      <div class="th-entity-name">[[collection.name]]</div>
+      <div class="th-entity-id">[[collection.id]]</div>
+    </section>
+
+    <section mobile$="{{mobile}}" class="traceable-properties">
+      <div flex hidden$="{{!_hasIdentifiers(collection)}}">
+        <h4>Identifiers</h4>
+        <th-object-view class="content-section" object="{{collection.identifiers}}"></th-object-view>
+      </div>
+
+      <div flex hidden$="{{!_hasTags(collection)}}">
+        <h4>Tags</h4>
+        <template is="dom-repeat" items="{{collection.tags}}">
+          <th-chip>{{item}}</th-chip>
+        </template>
+      </div>
+    </section>
+
+    <section class="custom-fields" hidden$="{{!_hasCustomFields(collection)}}">
+      <hr>
+      <h4>Custom Fields</h4>
+      <th-object-view class="content-section" object="{{collection.customFields}}"></th-object-view>
+    </section>
+
+    <hr>
+
+    <section class="actions">
+      <h4>Actions</h4>
+
+      <container>
+        <template is="dom-repeat" items="{{actionTypes}}">
+          <paper-item class="action-type" on-tap="createAction">
+            <span>{{_getActionTypeDisplayName(item)}}</span>
+            <span class="flex"></span>
+            <iron-icon icon="send"></iron-icon>
+            <paper-ripple></paper-ripple>
+          </paper-item>
+        </template>
+      </container>
+    </section>
+
+    <section class="thngs">
+      <h4>Thngs</h4>
+
+      <paper-autocomplete id="thngsSearch" label="Add thng" remote-source="true"
+                          on-autocomplete-change="debounceAutocomplete" on-autocomplete-selected="onThngSelected"></paper-autocomplete>
+
+      <container>
+        <iron-list id="collectionThngs" hidden$="{{!_hasAnyThngs(collection, collection.thngs)}}" items="{{collection.thngs}}">
+          <template>
+            <paper-item>
+              <span>{{item.name}}</span>
+              <span class="flex"></span>
+              <paper-icon-button icon="close" on-tap="onRemoveThngTap"></paper-icon-button>
+              <paper-ripple></paper-ripple>
+            </paper-item>
+          </template>
+        </iron-list>
+
+        <div class="empty-message" hidden$="{{_hasAnyThngs(collection, collection.thngs)}}">
+          <h4>No thngs in this collection</h4>
+        </div>
+      </container>
+    </section>
   </template>
   <script>
+
+    /**
+     * Simple element to display EVRYTHNG collections.
+     */
     Polymer({
 
       is: 'th-collection-details',
 
       properties: {
-        collectionId: {
-          type: String
-        },
-
-        user: {
-          type: Object
-        }
+        collectionId: String,
+        collection: Object,
+        user: Object
       },
 
       behaviors: [
-        EvtElements.behaviors.loader
+        TH.behaviors.showToast,
+        TH.behaviors.loader,
+        TH.behaviors.collection,
+        TH.behaviors.actionType
       ],
 
       observers: [
         'refresh(user, collectionId)'
       ],
 
-      _close: function() {
-        this.set('route.path', '');
-      },
-
+      /**
+       * Refreshes the element based on its current state
+       */
       refresh: function() {
         var scope = this;
 
         if (this.user && this.collectionId) {
           scope.set('loading', true);
 
-          this.user.collection(this.collectionId)
-            .read()
+          this.readCollection()
+            .then(this.readCollectionThngs.bind(this))
+            .then(this.readActionTypes.bind(this))
             .then(function(collection) {
               scope.collection = collection;
             })
             .catch(function() {
-              scope.$.loadingFailed.open();
+              scope.showToast('Failed to load collection');
+            })
+            .then(function() {
+              scope.set('loading', false);
+              scope.fireResize();
+            });
+        }
+      },
+
+      close: function() {
+        this.set('route.path', '');
+      },
+
+      readCollection: function() {
+        return this.user.collection(this.collectionId).read();
+      },
+
+      readThngsByName: function(name) {
+        return this.user.thng().read({
+          params: {
+            filter: 'name=' + name + '*'
+          }
+        });
+      },
+
+      readCollectionThngs: function(collection) {
+        return this.user.thng().read({
+          params: {
+            filter: {
+              collections: collection.id
+            },
+            perPage: 100
+          }
+        }).then(function(res) {
+          collection.thngs = res;
+          return collection;
+        });
+      },
+
+      addThngToCollection: function(id) {
+        return this.collection.thng().update([id]);
+      },
+
+      removeThngFromCollection: function(id) {
+        return this.collection.thng(id).delete();
+      },
+
+      readActionTypes: function(collection) {
+        var scope = this;
+        return this._readActionTypes()
+          .then(function(actionTypes) {
+            scope.actionTypes = actionTypes.filter(scope._isBuiltInActionType);
+
+            return collection;
+          });
+      },
+
+      createAction: function(e) {
+        var type = e.model.item;
+        var scope = this;
+
+        if (scope.user && scope.collection) {
+          scope.set('loading', true);
+          scope.user.action(type.name).create({
+            collection: scope.collection.id
+          })
+            .then(function() {
+              scope.showToast(type.name + ' action created');
+            })
+            .catch(function() {
+              scope.showToast('Failed to create action');
             })
             .then(function() {
               scope.set('loading', false);
             });
         }
+      },
+
+      isBigValue: function(val) {
+        if (String(val).length > 32) {
+          return 'big';
+        } else {
+          return 'small';
+        }
+      },
+
+      debounceAutocomplete: function() {
+        this.debounce('thngs-autocomplete', this._doAutocomplete, 300);
+      },
+
+      onThngSelected: function(e) {
+        var scope = this;
+        var thng = e.detail.value;
+
+        scope.set('loading', true);
+        scope.addThngToCollection(thng.id)
+          .then(function() {
+            scope.$.thngsSearch.text = '';
+            scope.unshift('collection.thngs', thng);
+            scope.showToast('Thng ' + thng.name + ' added to collection');
+            scope.fireResize();
+          })
+          .catch(function() {
+            scope.showToast('Failed to add thng to collection');
+          })
+          .then(function() {
+            scope.set('loading', false);
+          });
+      },
+
+      onRemoveThngTap: function(e) {
+        var scope = this;
+        var thng = e.model.item;
+
+        scope.removeThngFromCollection(thng.id)
+          .then(function () {
+            var index = scope.collection.thngs.indexOf(thng);
+
+            scope.splice('collection.thngs', index, 1);
+            scope.showToast('Thng ' + thng.name + ' removed from collection');
+            scope.fireResize();
+          })
+          .catch(function () {
+            scope.showToast('Failed to remove');
+          })
+          .then(function () {
+            scope.set('loading', false);
+          });
+      },
+
+      _doAutocomplete: function() {
+        var scope = this;
+        var input = scope.$.thngsSearch;
+        var query = input.text;
+        var existingIds = scope.collection.thngs.map(function(thng) {
+          return thng.id;
+        });
+
+        scope.set('loading', true);
+        scope.readThngsByName(query)
+          .then(function(thngs) {
+            input.suggestions(
+              thngs.filter(function(thng) {
+                return existingIds.indexOf(thng.id) === -1;
+              }).map(function(thng) {
+                return {
+                  text: thng.name,
+                  value: thng
+                };
+              })
+            );
+          })
+          .catch(function() {
+            scope.showToast('Failed to read thngs');
+          })
+          .then(function() {
+            scope.set('loading', false);
+          });
+      },
+
+      fireResize: function() {
+        this.$.collectionThngs.fire('iron-resize');
       }
+
 
     });
   </script>

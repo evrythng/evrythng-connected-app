@@ -19,7 +19,7 @@
       :host {
         display: block;
 
-        max-width: 700px;
+        max-width: var(--app-max-page-width);
       }
 
       h4 {
@@ -37,6 +37,11 @@
       .passport div {
         @apply(--layout-self-center);
         @apply(--layout-vertical);
+      }
+
+      .passport .th-entity-name {
+        overflow: auto;
+        white-space: normal;
       }
 
       .traceable-properties {
@@ -154,7 +159,6 @@
     <iron-media-query query="(max-width: 600px)" query-matches="{{mobile}}"></iron-media-query>
 
     <paper-icon-button icon="arrow-back" on-tap="close"></paper-icon-button>
-    <span class="layout flex">{{thng.name}}</span>
 
     <section class="passport">
       <iron-image class="th-entity-image" src="[[thng.photo]]" preload sizing="cover"></iron-image>

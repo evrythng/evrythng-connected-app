@@ -9,6 +9,7 @@
 <link rel="import" href="../bower_components/neon-animation/neon-animation.html">
 
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="th-loader.html">
 
 <dom-module id="th-login">
   <template>
@@ -53,16 +54,18 @@
         }
       </style>
       <h2>Login</h2>
-      <paper-input label="Login"></paper-input>
-      <paper-input label="Password" type="password"></paper-input>
-      <div class="buttons layout horizontal">
-        <paper-fab class="facebook" mini icon="th:facebook" on-tap="_loginWithFacebook"></paper-fab>
-        <span class="flex"></span>
-        <paper-button noink on-tap="_loginWithCreds">Login</paper-button>
-      </div>
+      <form name="th-login-form">
+        <paper-input label="Email" value="{{creds.email}}"></paper-input>
+        <paper-input label="Password" type="password" value="{{creds.password}}"></paper-input>
+        <div class="buttons layout horizontal">
+          <paper-fab class="facebook" mini icon="th:facebook" on-tap="_loginWithFacebook"></paper-fab>
+          <span class="flex"></span>
+          <paper-button type="submit" noink on-tap="_loginWithCreds">Login</paper-button>
+        </div>
+      </form>
     </paper-dialog>
 
-    <evt-loader hidden$="{{!loading}}" size="80px"></evt-loader>
+    <th-loader hidden$="{{!loading}}" size="80px"></th-loader>
   </template>
   <script>
     Polymer({
@@ -72,15 +75,16 @@
         loading: {
           type: Boolean,
           value: true
+        },
+
+        creds: {
+          type: Object,
+          value: {}
         }
       },
 
       _loginWithCreds: function(){
-        // TODO: Real input values
-        this.fire('login', {
-          user: 'sample@sam.com',
-          pass: 'something'
-        });
+        this.fire('login', this.creds);
       },
 
       _loginWithFacebook: function() {
@@ -88,9 +92,7 @@
       },
 
       open: function() {
-        if (!this.loading) {
-          this.$.loginForm.open();
-        }
+        this.$.loginForm.open();
       },
 
       close: function() {

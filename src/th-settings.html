@@ -2,7 +2,7 @@
 <link rel="import" href="../bower_components/paper-styles/paper-styles-classes.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
-<link rel="import" href="../bower_components/paper-slider/paper-slider.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
 
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="./th-thng-details.html">
@@ -12,8 +12,6 @@
     <style include="shared-styles">
       :host {
         display: block;
-
-        padding: 32px;
       }
 
       section {
@@ -21,60 +19,62 @@
       }
     </style>
 
-    <form>
-      <section id="authentication" on-change="validate">
-        <div class="subheader">Authentication</div>
+    <paper-material elevation="2">
+      <form>
+        <section id="authentication" on-change="validate">
+          <div class="subheader">Authentication</div>
 
-        <paper-textarea id="apiKey"
-                        label="Application API Key"
-                        required auto-validate
-                        value="{{settings.apiKey}}"
-                        placeholder="Application API Key"
-        ></paper-textarea>
-      </section>
+          <paper-textarea id="apiKey"
+                          label="Application API Key"
+                          required auto-validate
+                          value="{{settings.apiKey}}"
+                          placeholder="Application API Key"
+          ></paper-textarea>
+        </section>
 
-      <section id="hosts" on-change="validate">
-        <div class="subheader">Hosts</div>
+        <section id="hosts" on-change="validate">
+          <div class="subheader">Hosts</div>
 
-        <paper-input id="apiUrl"
-                     label="EVRYTHNG API Address"
-                     required auto-validate
-                     error-message="Please type a URL."
-                     type="url"
-                     value="{{settings.apiUrl}}"
-                     placeholder="E.g. https://api.evrythng.com"
-        ></paper-input>
+          <paper-input id="apiUrl"
+                       label="EVRYTHNG API Address"
+                       required auto-validate
+                       error-message="Please type a URL."
+                       type="url"
+                       value="{{settings.apiUrl}}"
+                       placeholder="E.g. https://api.evrythng.com"
+          ></paper-input>
 
-        <paper-input id="localhostUrl"
-                     label="Local Hub Address"
-                     required auto-validate
-                     error-message="Please type a URL."
-                     type="url"
-                     value="{{settings.localhostApiUrl}}"
-                     placeholder="E.g. http://192.168.1.7:8080"
-        ></paper-input>
+          <paper-input id="localhostUrl"
+                       label="Local Hub Address"
+                       required auto-validate
+                       error-message="Please type a URL."
+                       type="url"
+                       value="{{settings.localhostApiUrl}}"
+                       placeholder="E.g. http://192.168.1.7:8080"
+          ></paper-input>
 
-        <paper-input id="wsApiUrl"
-                     label="Remote WebSockets server"
-                     required auto-validate
-                     error-message="Please type a URL."
-                     type="url"
-                     value="{{settings.wsApiUrl}}"
-                     placeholder="E.g. wss://192.168.0.13:443/mqtt"
-        ></paper-input>
+          <paper-input id="wsApiUrl"
+                       label="Remote WebSockets server"
+                       required auto-validate
+                       error-message="Please type a URL."
+                       type="url"
+                       value="{{settings.wsApiUrl}}"
+                       placeholder="E.g. wss://192.168.0.13:443/mqtt"
+          ></paper-input>
 
-        <paper-input id="wsLocalhostUrl"
-                     label="Local Hub WebSockets server"
-                     required auto-validate
-                     error-message="Please type a URL."
-                     type="url"
-                     value="{{settings.wsLocalhostApiUrl}}"
-                     placeholder="E.g. wss://192.168.0.13:443/mqtt"
-        ></paper-input>
-      </section>
+          <paper-input id="wsLocalhostUrl"
+                       label="Local Hub WebSockets server"
+                       required auto-validate
+                       error-message="Please type a URL."
+                       type="url"
+                       value="{{settings.wsLocalhostApiUrl}}"
+                       placeholder="E.g. wss://192.168.0.13:443/mqtt"
+          ></paper-input>
+        </section>
 
-      <p>Settings are automatically saved on any edit.</p>
-    </form>
+        <p>Settings are automatically saved on any edit.</p>
+      </form>
+    </paper-material>
 
   </template>
 

@@ -15,23 +15,35 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <style>
       :host {
         display: block;
+        text-align: center;
 
         padding: 10px 20px;
+      }
+
+      h3 {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+
+        margin: var(--app-unit-sm);
+        font-size: var(--app-unit-xl);
       }
 
       h3 iron-icon {
         width: var(--app-unit-xl);
         height: var(--app-unit-xl);
 
-        margin-left: var(--app-unit-xl);
+        transform: translateY(5px);
       }
     </style>
 
     <h3>
+      <span>4</span>
       <iron-icon icon="th:emoticon-poop"></iron-icon>
+      <span>4</span>
     </h3>
     <p>
-      Oops you hit a 404. <a href="/">Head back to home.</a>
+      Oops you hit a dead link. <a href="/">Head back to home.</a>
     </p>
   </template>
 
