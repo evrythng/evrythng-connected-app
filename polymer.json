@@ -1,11 +1,11 @@
 {
   "entrypoint": "index.html",
-  "shell": "src/my-app.html",
+  "shell": "src/th-app.html",
   "fragments": [
-    "src/my-view1.html",
-    "src/my-view2.html",
-    "src/my-view3.html",
-    "src/my-view404.html"
+    "src/th-thngs.html",
+    "src/th-collections.html",
+    "src/th-settings.html",
+    "src/th-view404.html"
   ],
   "sourceGlobs": [
    "src/**/*",

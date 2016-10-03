@@ -1,23 +1,56 @@
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/iron-localstorage/iron-localstorage.html">
+
+<link rel="import" href="shared-styles.html">
+
 <dom-module id="th-evt-debug">
   <template>
-    <style>
+    <style include="shared-styles">
       :host {
         @apply(--layout-block);
         @apply(--layout-fixed-bottom);
+
+        transition: all .3s ease;
+        transform: translateY(100%);
+      }
+
+      :host(.opened) {
+        transform: translateY(0%);
       }
 
       container {
+        display: block;
+
         height: 50vh;
+        background-color: var(--paper-grey-50);
+        box-shadow: 0 -20px 70px rgba(0, 0, 0, .2);
+        transform: translateY(0);
       }
+
+      h1 {
+        font-weight: lighter;
+        margin: var(--app-unit-sm);
+      }
+
     </style>
 
     <container>
-      <h1>Debugger</h1>
+      <h1>Trace</h1>
     </container>
+
+    <iron-localstorage name="th-devtool-opened" value="{{opened}}" on-iron-localstorage-load-empty="_setFalse"></iron-localstorage>
+
   </template>
   <script>
     Polymer({
       is: 'th-evt-debug',
+
+      properties: {
+        opened: {
+          type: Boolean,
+          observer: '_onOpenedChanged'
+        }
+      },
 
       ready: function() {
         if (window.EVT) {
@@ -50,6 +83,15 @@
         console.log(opts);
 
         return opts;
+      },
+
+      _onOpenedChanged: function(opened) {
+        this.classList.toggle('opened', opened);
+        this.fire('state-changed', opened);
+      },
+
+      _setFalse: function() {
+        this.opened = false;
       }
     });
   </script>

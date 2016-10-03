@@ -38,6 +38,21 @@
 
         display: block;
       }
+
+      app-drawer-layout {
+        transition: all .5s ease;
+        transform-origin: bottom;
+        overflow: hidden;
+        height: 100vh;
+        background-color: var(--paper-grey-200);
+
+        @apply(--shadow-elevation-16dp);
+      }
+
+      :host(.with-dev-tool) app-drawer-layout {
+        height: 50vh;
+        transform: scale(.96);
+      }
     </style>
 
     <iron-localstorage name="th-settings" value="{{settings}}" on-iron-localstorage-load-empty="_setDefaultSettings"></iron-localstorage>
@@ -97,6 +112,7 @@
           <app-toolbar>
             <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
             <th-toolbar-search query="{{query}}"></th-toolbar-search>
+            <paper-icon-button icon="bug-report" on-tap="toggleDevTool"></paper-icon-button>
             <span class="flex"></span>
             <th-user user="{{user}}" on-logout="_logout"></th-user>
           </app-toolbar>
@@ -117,7 +133,7 @@
     </app-drawer-layout>
 
     <th-login id="loginForm" hidden$="[[_isReady(app, user)]]" loading="{{loading}}" on-login="_onLogin"></th-login>
-    <th-evt-debug></th-evt-debug>
+    <th-evt-debug id="debugTool" on-state-changed="_onDevToolStateChanged"></th-evt-debug>
   </template>
 
   <script>
@@ -560,6 +576,14 @@
         }).then(function() {
           return response;
         });
+      },
+
+      toggleDevTool: function() {
+        this.$.debugTool.opened = !this.$.debugTool.opened;
+      },
+
+      _onDevToolStateChanged: function(e) {
+        this.classList.toggle('with-dev-tool', e.detail);
       }
     });
   </script>
