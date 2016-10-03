@@ -1,0 +1,149 @@
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+
+<link rel="import" href="../bower_components/paper-styles/typography.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
+
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="th-thng-list">
+  <style include="shared-styles">
+    :host {
+      display: block;
+    }
+
+    paper-item {
+      @apply(--layout-horizontal);
+
+      padding: var(--app-unit-xs);
+    }
+
+    paper-item > div {
+      @apply(--layout-self-center);
+      @apply(--layout-vertical);
+    }
+
+    paper-item > iron-image {
+      margin-right: var(--app-unit-sm);
+    }
+
+    .empty-message {
+      text-align: center;
+    }
+
+  </style>
+  <template>
+
+    <div class="empty-message" hidden$={{_hasAnyThngs(thngs)}}>
+      <h4>No items found</h4>
+    </div>
+
+    <iron-list items="{{thngs}}" id="list" indexAs="id" selection-enabled>
+      <template>
+        <paper-item>
+          <iron-image class="th-entity-image" src="[[item.photo]]" preload sizing="cover"></iron-image>
+          <div>
+            <span class="th-entity-name">[[item.name]]</span>
+            <span class="th-entity-id">[[item.id]]</span>
+          </div>
+
+          <paper-ripple></paper-ripple>
+        </paper-item>
+      </template>
+    </iron-list>
+  </template>
+  <script>
+    Polymer({
+      is: 'th-thng-list',
+
+      properties: {
+
+        filter: {
+          type: Object,
+          observer: 'refresh'
+        },
+
+        selectedItem: {
+          type: Object,
+          notify: true
+        },
+
+        user: {
+          type: Object,
+          observer: 'refresh'
+        }
+
+      },
+
+      behaviors: [
+        TH.behaviors.loader,
+        TH.behaviors.showToast,
+        TH.behaviors.productCache,
+        TH.behaviors.product
+      ],
+
+      listeners: {
+        'list.selected-item-changed': '_selectionChanged'
+      },
+
+      observers: [
+        'refresh(filter.*)'
+      ],
+
+      refresh: function () {
+        var scope = this;
+
+        if (!scope.loading && scope.user) {
+          scope.set('loading', true);
+          scope.readThngs()
+            .then(function (thngs) {
+              scope.thngs = thngs;
+            })
+            .catch(function() {
+              scope.showToast('Failed to read thngs');
+            })
+            .then(function() {
+              scope.set('loading', false);
+            });
+        }
+      },
+
+      readThngs: function() {
+        var scope = this;
+
+        return this.user.thng().read({
+          params: {
+            filter: scope.filter
+          }
+        })
+          .then(function(thngs) {
+            return Promise.all(
+              thngs.map(function(thng) {
+                if (thng.product) {
+                  return scope._readProduct(thng.product)
+                    .then(function(product) {
+                      thng.product = product;
+                      thng.photo = scope._getProductPhoto(product);
+                    });
+                } else {
+                  return Promise.resolve();
+                }
+              })
+            ).then(function() {
+              return thngs;
+            });
+          });
+      },
+
+      _selectionChanged: function(e) {
+        this.fire('item-selected', e.detail.value);
+      },
+
+      _hasAnyThngs: function(thngs) {
+        return thngs && thngs.length > 0;
+      }
+    });
+  </script>
+</dom-module>

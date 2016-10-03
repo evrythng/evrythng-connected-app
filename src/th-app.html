@@ -18,82 +18,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 
-<link rel="import" href="../bower_components/evt-elements/evt-elements.html">
+<script src="../bower_components/lodash/lodash.js"></script>
+<script src="../bower_components/evrythng/dist/evrythng.js"></script>
+<script src="../bower_components/mqttjs-browserified/dist/mqtt.js"></script>
+<script src="../bower_components/evrythng-ws/dist/evrythng-ws.js"></script>
+<script src="../bower_components/evrythng-hub/dist/evrythng-hub.js"></script>
+<script src="../bower_components/time-elements/time-elements.js"></script>
 
+<link rel="import" href="th-core.html">
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="th-iconset.html">
 <link rel="import" href="th-login.html">
 <link rel="import" href="th-user.html">
 
-<script src="../bower_components/lodash/lodash.js"></script>
-
 <dom-module id="th-app">
   <template>
     <style include="iron-flex shared-styles">
-
       :host {
         --primary-color: var(--paper-grey-900);
         --secondary-color: black;
 
         display: block;
       }
-
-      app-header {
-        @apply(--shadow-elevation-2dp);
-        background-color: var(--app-header-color);
-      }
-
-      app-drawer > container {
-        @apply(--app-layout-fit-drawer);
-        @apply(--app-drawer-dark-theme);
-        @apply(--shadow-elevation-12dp);
-
-        background-color: var(--app-drawer-color);
-      }
-
-      app-drawer > container section {
-        margin-bottom: var(--app-unit-sm);
-      }
-
-      app-drawer > container section > label {
-        font-size: var(--app-unit-sm);
-      }
-
-      app-drawer evt-powered-by {
-        position: absolute;
-        bottom: 140px;
-      }
-
-      app-header paper-icon-button {
-        --paper-icon-button-ink-color: white;
-      }
-
-      .target-environment {
-        @apply(--layout-horizontal);
-      }
-
-      .target-environment > span {
-        @apply(--layout-flex);
-      }
-
-      .target-environment > iron-icon {
-        @apply(--layout-self-center);
-      }
-
-      .header-logo {
-        padding: var(--app-unit-md);
-      }
-
-      .header-logo evt-logo {
-        height: var(--app-unit-xl);
-      }
     </style>
-
-    <evt-app id="app" settings="[[settings]]" app="{{app}}" user="{{user}}" facebook ws hub></evt-app>
 
     <iron-localstorage name="th-settings" value="{{settings}}" on-iron-localstorage-load-empty="_setDefaultSettings"></iron-localstorage>
 
@@ -110,17 +62,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <container>
 
           <section class="header-logo">
-            <evt-logo mode="inverted"></evt-logo>
+            <img src="/images/evt-logo-inverted.png" alt="EVRYTHNG" sizing="cover"></iron-image>
           </section>
           <hr>
 
           <section>
             <iron-selector selected="[[page]]" attr-for-selected="name" role="navigation">
               <a class="drawer-item" name="thngs" href="/thngs">
-                <iron-icon icon="evt:thng"></iron-icon><span>Thngs</span>
+                <iron-icon icon="th:thng"></iron-icon><span>Thngs</span>
               </a>
               <a class="drawer-item" name="collections" href="/collections">
-                <iron-icon icon="evt:collection"></iron-icon><span>Collections</span>
+                <iron-icon icon="th:collection"></iron-icon><span>Collections</span>
               </a>
 
               <hr>
@@ -138,7 +90,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             </span>
           </section>
 
-          <evt-powered-by></evt-powered-by>
+          <footer>
+            <a href="https://evrythng.com" class="th-powered-by">
+              <span>Powered by</span><img class="mini-logo" src="/images/evt-logo-mini.jpg" alt="EVRYTHNG">
+            </a>
+          </footer>
         </container>
       </app-drawer>
 
@@ -147,7 +103,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <app-header condensed reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-            <div main-title>Metahub</div>
             <span class="flex"></span>
             <th-user user="{{user}}" on-logout="_logout"></th-user>
           </app-toolbar>
@@ -190,13 +145,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       observers: [
+        'setupEVT(settings)',
         '_routePageChanged(routeData.page)',
         '_onTargetEnvironmentChange(settings.remote)'
       ],
 
       behaviors: [
-        EvtElements.behaviors.toaster,
-        EvtElements.behaviors.storage
+        TH.behaviors.showToast
       ],
 
       defaultSettings: {
@@ -213,20 +168,67 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       ready: function() {
+        // Initialise EVT.js after
+        // settings are read from storage and all
+        // children are ready.
         this.async(function() {
-          var scope = this;
-
-          scope.set('loading', true);
-
-          this.$.app.init()
-            .then(function() {
-              scope.set('loading', false);
-
-              if (!scope.user) {
-                scope.$.loginForm.open();
-              }
-            });
+          this.initEVT();
+          this.initApp();
         });
+      },
+
+      initEVT: function() {
+        if (this.settings) {
+          EVT.use(EVT.WS);
+          EVT.use(EVT.Hub);
+
+          this.setupEVT(this.settings);
+        }
+      },
+
+      setupEVT: function(settings) {
+        if (settings) {
+          EVT.WS.setup({
+            apiUrl: settings.wsApiUrl
+          });
+
+          EVT.Hub.setup({
+            httpApiUrl: settings.localhostApiUrl,
+            wsApiUrl: settings.wsLocalhostApiUrl,
+            timeout: settings.hubTimeout,
+            remote: settings.remote
+          });
+
+          EVT.setup(settings);
+        }
+      },
+
+      initApp: function() {
+        var scope = this;
+        var app = new EVT.App({
+          apiKey: this.settings.apiKey
+        });
+
+        app.$init.then(function() {
+            return scope._initFacebook(app.socialNetworks.facebook.appId)
+              .then(function(response) {
+                if (response.status === 'connected') {
+                  return scope._authFacebook(response, app);
+                } else {
+                  return response;
+                }
+              });
+          })
+          .then(function(response) {
+            if (response.user) {
+              scope.set('user', response.user);
+            } else {
+              scope.$.loginForm.open();
+            }
+
+            scope.set('app', app);
+            scope.set('loading', false);
+          });
       },
 
       _isReady: function(app, user) {
@@ -273,8 +275,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         fields.forEach(function(field) {
           this.set('settings.' + field, settings[field]);
         }, this);
-
-        this.store.set('th-settings', this.settings);
       },
 
       _onLogin: function(e) {
@@ -301,7 +301,71 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _setDefaultSettings: function() {
         this.settings = this.defaultSettings;
-      }
+      },
+
+      _initFacebook: function(appId) {
+        var scope = this;
+
+        return new Promise(function(resolve, reject) {
+          (function(d, s, id){
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "//connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+          }(document, 'script', 'facebook-jssdk'));
+
+          window.fbAsyncInit = function() {
+            FB.init({
+              appId: appId,
+              status: true,
+              cookie: true,
+              version: 'v2.7'
+            });
+
+            FB.getLoginStatus(function (response) {
+              if (response.status === 'connected') {
+                FB.api('/me', {
+                  fields: 'id,first_name,last_name,gender,link,picture,locale,name,timezone,updated_time,verified'
+                }, function (userInfo) {
+                  resolve(scope.mixin(response, { user: userInfo }));
+                });
+              } else {
+                resolve(response);
+              }
+            });
+          };
+        });
+      },
+
+      _authFacebook: function(response, app) {
+        var scope = this;
+
+        return EVT.api({
+          url: '/auth/facebook',
+          method: 'post',
+          data: {
+            access: {
+              token: response.authResponse.accessToken
+            }
+          }
+        }).then(function(access) {
+          var user = new EVT.User({
+            id: access.evrythngUser,
+            apiKey: access.evrythngApiKey
+          }, app);
+
+          scope.mixin(user, {
+            facebook: response.user
+          });
+
+          response.user = user;
+
+          return user.update();
+        }).then(function() {
+          return response;
+        });
+      },
     });
   </script>
 </dom-module>

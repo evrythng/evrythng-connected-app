@@ -1,0 +1,146 @@
+<script>
+  /**
+   * Thng behavior.
+   * Has abstract methods to retrieve the data values from thng model.
+   *
+   * @behavior
+   */
+  TH.behaviors.thng = [ TH.behaviors.entity, {
+
+    /**
+     * Defines name of entity to look
+     * for underlying abstract methods.
+     */
+    name: 'thng',
+
+    /**
+     * Stores available property types
+     */
+    types: {
+      string: {
+        match: 'isString',
+        output: String,
+        debounce: 500
+      },
+
+      boolean: {
+        match: 'isBoolean',
+        output: Boolean
+      },
+
+      number: {
+        match: 'isNumber',
+        output: Number,
+        debounce: 300
+      }
+    },
+
+    /**
+     * Stores properties history (last 30)
+     */
+    _propertiesHistory: {},
+
+    /**
+     * Returns true if given thng has at least one property
+     */
+    _hasProperties: function(thng) {
+      return this._listProperties(thng).length > 0;
+    },
+
+    /**
+     * Lists current slice of thng properties
+     * @returns {*}
+     * @private
+     */
+    _listProperties: function(thng) {
+      return Object.keys((thng && thng.properties) || {});
+    },
+
+    /**
+     * Returns current property value.
+     *
+     * @param {String} name Name of property
+     * @returns {*}
+     * @private
+     */
+    _getPropertyValue: function(name) {
+      return this.get('thng.properties.' + name);
+    },
+
+    /**
+     * Computes type of given property.
+     */
+    _getPropertyType: function(value) {
+      var typ = this._typ(value);
+      var base = this.types[typ] || this.types.string;
+      var type = {
+        typ: typ,
+        isString: false,
+        isNumber: false,
+        isBoolean: false,
+        debounce: base.debounce,
+        output: base.output,
+        history: base.history
+      };
+
+      type[base.match] = true;
+
+      return type;
+    },
+
+    _getPropertyHistory: function(prop) {
+      var target = this._propertiesHistory[prop.name];
+
+      if (target) {
+        return target;
+      } else {
+        return [];
+      }
+    },
+
+    /**
+     * Lists all available thng properties.
+     *
+     * @param {Object} thng
+     * @returns {Object[]}
+     * @private
+     */
+    _computeProperties: function(thng) {
+      var props = this._abstractListProperty(thng, 'properties');
+
+      return props.map(function(prop) {
+        var res = thng.property(prop.name);
+
+        prop.type = this._getPropertyType(prop.value);
+        prop.history = this._getPropertyHistory(prop);
+        prop.update = res.update.bind(res);
+
+        return prop;
+      }, this);
+    },
+
+    _addPropertyHistory: function(name, records) {
+      var target;
+
+      if (this._typ(records) === 'object') {
+        records = [ records ];
+      }
+
+      target = this._propertiesHistory[name] = this._propertiesHistory[name] || [];
+      records.forEach(function(record) {
+        this.push('_propertiesHistory.' + name, record);
+
+        if (target.length > 30) {
+          this.shift('_propertiesHistory.' + name);
+        }
+      }, this);
+
+      target.sort(function(a, b) {
+        return a.timestamp < b.timestamp ? 1 : -1;
+      });
+
+
+    }
+
+  }];
+</script>

@@ -1,0 +1,59 @@
+<script>
+
+  TH.behaviors.entity = [ TH.behaviors.objectProperties, {
+
+    /**
+     * Returns true if attached entity has any identifier
+     *
+     * @returns {boolean}
+     * @private
+     */
+    _hasIdentifiers: function () {
+      return !this._isEmpty(this.name + '.identifiers');
+    },
+
+    /**
+     * Returns true if attached entity has any custom field
+     *
+     * @returns {boolean}
+     * @private
+     */
+    _hasCustomFields: function () {
+      return !this._isEmpty(this.name + '.customFields');
+    },
+
+    /**
+     * Returns true if attached entity have any tags
+     *
+     * @returns {boolean}
+     * @private
+     */
+    _hasTags: function() {
+      return !this._isEmpty(this.name + '.tags');
+    },
+
+    /**
+     * List all identifiers on given entity as a plain array.
+     *
+     * @param {Object} obj
+     * @returns {*}
+     * @private
+     */
+    _listIdentifiers: function (obj) {
+      return this._abstractListProperty(obj, 'identifiers');
+    },
+
+    /**
+     * Lists all customFields on given entity as a plain array
+     *
+     * @param {Object} obj
+     * @returns {*}
+     * @private
+     */
+    _listCustomFields: function (obj) {
+      return this._abstractListProperty(obj, 'customFields');
+    }
+
+  }];
+
+</script>

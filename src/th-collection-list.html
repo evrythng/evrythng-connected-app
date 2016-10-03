@@ -1,0 +1,118 @@
+<link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+
+<link rel="import" href="../bower_components/paper-styles/typography.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
+
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="th-collection-list">
+  <style include="shared-styles">
+    :host {
+      display: block;
+    }
+
+    paper-item {
+      @apply(--layout-vertical);
+
+      height: var(--app-unit-xl);
+      padding: var(--app-unit-xs);
+    }
+
+    .empty-message {
+      text-align: center;
+    }
+
+  </style>
+  <template>
+
+    <div class="empty-message" hidden$={{_hasAnyCollections(collections)}}>
+      <h4>No items found</h4>
+    </div>
+
+    <iron-list items="{{collections}}" id="list" indexAs="id" selection-enabled>
+      <template>
+        <paper-item>
+          <div class="th-entity-name">[[item.name]]</div>
+          <div class="th-entity-id">[[item.id]]</div>
+          <paper-ripple></paper-ripple>
+        </paper-item>
+      </template>
+    </iron-list>
+  </template>
+  <script>
+    Polymer({
+      is: 'th-collection-list',
+
+      properties: {
+
+        filter: {
+          type: Object,
+          observer: 'refresh'
+        },
+
+        selectedItem: {
+          type: Object,
+          notify: true
+        },
+
+        user: {
+          type: Object,
+          observer: 'refresh'
+        }
+
+      },
+
+      behaviors: [
+        TH.behaviors.loader,
+        TH.behaviors.showToast
+      ],
+
+      listeners: {
+        'list.selected-item-changed': '_selectionChanged'
+      },
+
+      observers: [
+        'refresh(filter.*)'
+      ],
+
+      refresh: function () {
+        var scope = this;
+
+        if (!scope.loading && scope.user) {
+          scope.set('loading', true);
+          scope.readCollections()
+            .then(function (thngs) {
+              scope.collections = thngs;
+            })
+            .catch(function() {
+              scope.showToast('Failed to read collections');
+            })
+            .then(function() {
+              scope.set('loading', false);
+            });
+        }
+      },
+
+      readCollections: function() {
+        var scope = this;
+
+        return this.user.collection().read({
+          params: {
+            filter: scope.filter
+          }
+        });
+      },
+
+      _selectionChanged: function(e) {
+        this.fire('item-selected', e.detail.value);
+      },
+
+      _hasAnyCollections: function(collections) {
+        return collections && collections.length > 0;
+      }
+    });
+  </script>
+</dom-module>

@@ -1,0 +1,26 @@
+<script>
+
+  (function() {
+    var _actionTypesCache;
+
+    /**
+     * Caches requested products.
+     *
+     * @behavior
+     */
+    TH.behaviors.actionTypesCache = {
+
+      _readActionTypes: function() {
+        if (_actionTypesCache) {
+          return Promise.resolve(_actionTypesCache);
+        } else {
+          return this.user.actionType().read()
+            .then(function(actionTypes) {
+              return _actionTypesCache = actionTypes;
+            });
+        }
+      }
+    };
+  })();
+
+</script>

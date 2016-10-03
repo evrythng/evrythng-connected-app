@@ -1,0 +1,11 @@
+<script>
+  TH.behaviors.product = [ TH.behaviors.productCache, {
+    _getProductPhoto: function(product) {
+      if (product && product.photos) {
+        return product.photos[0];
+      } else {
+        return '';
+      }
+    }
+  }];
+</script>

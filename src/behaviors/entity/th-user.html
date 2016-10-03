@@ -1,0 +1,65 @@
+<script>
+  /**
+   * User behavior.
+   * Has abstract methods to compute and retrieve the data values
+   * from user model.
+   *
+   * @behavior
+   */
+  TH.behaviors.user = [ TH.behaviors.objectProperties, {
+
+    properties: {
+      user: Object,
+
+      fullName: {
+        type: String,
+        computed: 'computeFullName(user)'
+      },
+
+      initials: {
+        type: String,
+        computed: 'computeInitials(user)'
+      },
+
+      photo: {
+        type: String,
+        computed: 'computePhoto(user)'
+      }
+    },
+
+    computeInitials: function(user) {
+      var output = '';
+
+      if (user && user.firstName && user.lastName) {
+        output = user.firstName[0] + user.lastName[0];
+      }
+
+      return output;
+    },
+
+    computeFullName: function(user) {
+      var output = '';
+
+      if (user && user.facebook) {
+        output = user.facebook.name ?
+          user.facebook.name : user.facebook.first_name + ' ' + user.facebook.last_name;
+      } else if(user) {
+        output = user.firstName + ' ' + user.lastName;
+      }
+
+      return output;
+    },
+
+    computePhoto: function(user) {
+      var output;
+
+      if (user && user.facebook) {
+        output = this.get('user.facebook.picture.data.url') || '';
+      } else {
+        output = '';
+      }
+
+      return output;
+    }
+  }];
+</script>

@@ -1,0 +1,24 @@
+<script>
+  (function () {
+    var _productCache = {};
+
+    /**
+     * Caches requested products.
+     *
+     * @behavior
+     */
+    TH.behaviors.productCache = {
+
+      _readProduct: function(id) {
+        if (_productCache[id]) {
+          return Promise.resolve(_productCache[id]);
+        } else {
+          return this.user.product(id).read()
+            .then(function(product) {
+              return _productCache[id] = product;
+            });
+        }
+      }
+    };
+  })();
+</script>

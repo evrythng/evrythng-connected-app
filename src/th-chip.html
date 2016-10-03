@@ -1,0 +1,23 @@
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="th-chip">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: inline-block;
+
+        background-color: var(--app-chip-color);
+        padding: var(--app-unit-xs) var(--app-unit-sm);
+        border-radius: var(--app-unit-xl);
+        margin-right: var(--app-unit-xs);
+        margin-bottom: var(--app-unit-xs);
+      }
+    </style>
+    <content></content>
+  </template>
+  <script>
+    Polymer({
+      is: 'th-chip'
+    });
+  </script>
+</dom-module>

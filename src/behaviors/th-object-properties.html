@@ -1,0 +1,52 @@
+<script>
+  /**
+   * Nested property utility behavior.
+   *
+   * @behavior
+   */
+  TH.behaviors.objectProperties = {
+
+    /**
+     * Normalises the type of given value
+     * Recognises many of built-in default types. Acting via [[Class]] prop.
+     *
+     * @param {*} val
+     * @returns {string}
+     * @private
+     */
+    _typ: function(val) {
+      return ({}).toString.call(val).match(/\s([a-zA-Z]+)/)[1].toLowerCase()
+    },
+
+    /**
+     * Checks whether given path have any value at all
+     *
+     * @param {String} path
+     * @returns {Number}
+     * @private
+     */
+    _isEmpty: function(path) {
+      return Object.keys(this.get(path) || {}).length === 0;
+    },
+
+
+    /**
+     * Abstract property listing
+     *
+     * @param {Object} obj source to take prop from
+     * @param {String} prop name of property to list
+     * @returns {Array}
+     * @private
+     */
+    _abstractListProperty: function (obj, prop) {
+      prop = (obj && obj[prop]) || obj || {};
+
+      return Object.keys(prop).map(function (field) {
+        return {
+          name: field,
+          value: prop[field]
+        }
+      });
+    }
+  };
+</script>

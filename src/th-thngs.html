@@ -1,15 +1,16 @@
-<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
 
 <link rel="import" href="shared-styles.html">
-<link rel="import" href="./th-thng-details.html">
+<link rel="import" href="th-thng-list.html">
+<link rel="import" href="th-thng-details.html">
+<link rel="import" href="th-list-filter.html">
 
 <dom-module id="th-thngs">
   <template>
     <style include="shared-styles">
       :host {
         display: block;
-
-        max-width: 700px;
+        max-width: var(--app-max-page-width);
       }
     </style>
 
@@ -21,16 +22,24 @@
       active="{{detailsActive}}"
     ></app-route>
 
-    <container class="card">
-      <evt-thng-list id="list" hidden$="{{detailsActive}}" user="{{user}}" on-item-selected="_onThngSelected"></evt-thng-list>
+    <paper-material elevation="2" hidden$="{{detailsActive}}">
+      <th-list-filter filter="{{filter}}"></th-list-filter>
+    </paper-material>
+
+    <paper-material elevation="2">
+      <th-thng-list id="list" hidden$="{{detailsActive}}" user="{{user}}" filter="{{filter}}" on-item-selected="_onThngSelected"></th-thng-list>
       <th-thng-details hidden$="{{!detailsActive}}" user="{{user}}" thng-id="{{routeData.id}}" route="{{route}}"></th-thng-details>
-    </container>
+    </paper-material>
 
   </template>
 
   <script>
     Polymer({
       is: 'th-thngs',
+
+      properties: {
+        filter: Object
+      },
 
       observers: [
         '_onPathChanged(route.path)'

@@ -1,25 +1,235 @@
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-data-table/iron-data-table.html">
+
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+
 <link rel="import" href="../bower_components/neon-animation/neon-animation.html">
-<link rel="import" href="../bower_components/paper-tabs/paper-tabs.html">
+
+<link rel="import" href="th-chip.html">
+<link rel="import" href="th-object-view.html">
+<link rel="import" href="th-edit-property-modal.html">
+<link rel="import" href="shared-styles.html">
 
 <dom-module id="th-thng-details">
   <template>
-    <style>
+    <style include="shared-styles iron-flex">
       :host {
         display: block;
 
         max-width: 700px;
       }
+
+      h4 {
+        margin: var(--app-unit-xs) 0;
+      }
+
+      .passport {
+        @apply(--layout-horizontal);
+      }
+
+      .passport iron-image {
+        margin-right: var(--app-unit-md);
+      }
+
+      .passport div {
+        @apply(--layout-self-center);
+        @apply(--layout-vertical);
+      }
+
+      .traceable-properties {
+        @apply(--layout-horizontal);
+      }
+
+      .traceable-properties[mobile] {
+        @apply(--layout-vertical);
+      }
+
+      .traceable-properties > * {
+        @apply(--layout-flex);
+
+        margin: var(--app-unit-xs);
+      }
+
+      .custom-fields > * {
+        margin: var(--app-unit-xs);
+      }
+
+      .content-section {
+        padding: var(--app-unit-xs);
+        background-color: var(--app-details-background);
+      }
+
+      .properties > * {
+        margin: var(--app-unit-xs);
+      }
+
+      .properties > container {
+        @apply(--layout-horizontal);
+        @apply(--layout-wrap);
+      }
+
+      .property {
+        @apply(--app-layout-flex-25);
+        @apply(--layout-vertical);
+
+        box-sizing: border-box;
+        margin: var(--app-unit-sm);
+        padding: var(--app-unit-sm);
+        min-width: calc(var(--app-unit-xl) * 2);
+        max-width: calc(var(--app-unit-xl) * 4);
+      }
+
+      .property.big {
+        min-width: calc(100% - var(--app-unit-md));
+      }
+
+      .property > container {
+        @apply(--layout-block);
+      }
+
+      .property.boolean {
+        background-color: var(--app-boolean-property-color);
+        color: var(--app-boolean-text-color);
+      }
+
+      .property.boolean > container {
+        text-align: center;
+      }
+
+      .property.boolean .circle {
+        font-weight: lighter;
+        font-size: calc(var(--app-unit-lg) - var(--app-unit-sm));
+        color: var(--app-boolean-text-color);
+      }
+
+      .property.boolean .circle.true {
+        background-color: var(--paper-green-500);
+      }
+
+      .property.boolean .circle.false {
+        background-color: var(--paper-red-500);
+      }
+
+      .property.string {
+        background-color: var(--app-string-property-color);
+        color: var(--app-string-text-color);
+      }
+
+      .property.number {
+        background-color: var(--app-number-property-color);
+        color: var(--app-number-text-color);
+      }
+
+      .property.number > container,
+      .property.string > container {
+        font-size: var(--app-unit-lg);
+        font-weight: lighter;
+      }
+
+      .property > header > label {
+        @apply(--paper-font-common-nowrap);
+        @apply(--layout-block);
+      }
+
+      .actions {
+        margin: var(--app-unit-xs);
+      }
+
+      .action-type {
+        @apply(--layout-horizontal);
+      }
+
+      paper-dialog {
+        z-index: 103;
+      }
+
+      paper-material:hover {
+        @apply(--shadow-elevation-8dp);
+      }
     </style>
 
-    <paper-icon-button icon="arrow-back" on-tap="_close"></paper-icon-button>
+    <iron-media-query query="(max-width: 600px)" query-matches="{{mobile}}"></iron-media-query>
+
+    <paper-icon-button icon="arrow-back" on-tap="close"></paper-icon-button>
     <span class="layout flex">{{thng.name}}</span>
 
-    <evt-thng-full thng="{{thng}}"></evt-thng-full>
-    <evt-thng-properties thng="{{thng}}"></evt-thng-properties>
-    <evt-thng-actions thng="{{thng}}"></evt-thng-actions>
+    <section class="passport">
+      <iron-image class="th-entity-image" src="[[thng.photo]]" preload sizing="cover"></iron-image>
+      <div>
+        <span class="th-entity-name">[[thng.name]]</span>
+        <span class="th-entity-id">[[thng.id]]</span>
+      </div>
+    </section>
 
-    <paper-toast id="loadingFailed" text="Failed to load requested thng"></paper-toast>
+    <section mobile$="{{mobile}}" class="traceable-properties">
+      <div flex hidden$="{{!_hasIdentifiers(thng)}}">
+        <h4>Identifiers</h4>
+        <th-object-view class="content-section" object="{{thng.identifiers}}"></th-object-view>
+      </div>
+
+      <div flex hidden$="{{!_hasTags(thng)}}">
+        <h4>Tags</h4>
+        <template is="dom-repeat" items="{{thng.tags}}">
+          <th-chip>{{item}}</th-chip>
+        </template>
+      </div>
+    </section>
+
+    <section class="custom-fields" hidden$="{{!_hasCustomFields(thng)}}">
+      <hr>
+      <h4>Custom Fields</h4>
+      <th-object-view class="content-section" object="{{thng.customFields}}"></th-object-view>
+    </section>
+
+    <hr>
+
+    <section class="properties" hidden$="{{!_hasProperties(thng)}}">
+      <h4>Properties</h4>
+      <container>
+        <template is="dom-repeat" items="{{props}}" observe="value">
+          <paper-material animated elevation="2" class$="property {{item.type.typ}} {{isBigValue(item.value)}}"
+                          on-tap="openProperty">
+            <header>
+              <label>{{item.name}}</label>
+              <paper-tooltip>{{item.name}}</paper-tooltip>
+            </header>
+            <container>
+              <template is="dom-if" if="{{item.type.isString}}">
+                <span>{{item.value}}</span>
+              </template>
+
+              <template is="dom-if" if="{{item.type.isBoolean}}">
+                <div class$="circle {{item.value}}">
+                  {{item.value}}
+                </div>
+              </template>
+
+              <template is="dom-if" if="{{item.type.isNumber}}">
+                <span>{{item.value}}</span>
+              </template>
+            </container>
+          </paper-material>
+        </template>
+      </container>
+    </section>
+
+    <section class="actions">
+      <h4>Actions</h4>
+
+      <container>
+        <template is="dom-repeat" items="{{actionTypes}}">
+          <paper-item class="action-type" on-tap="createAction">
+            <span>{{_getActionTypeDisplayName(item)}}</span>
+            <span class="flex"></span>
+            <iron-icon icon="send"></iron-icon>
+            <paper-ripple></paper-ripple>
+          </paper-item>
+        </template>
+      </container>
+    </section>
   </template>
   <script>
 
@@ -41,22 +251,32 @@
           type: String
         },
 
+        thng: {
+          type: Object,
+          observer: '_thngChanged'
+        },
+
         user: {
           type: Object
+        },
+
+        props: {
+          type: Array,
+          computed: '_computeProps(thng.properties.*)'
         }
       },
 
       behaviors: [
-        EvtElements.behaviors.loader
+        TH.behaviors.showToast,
+        TH.behaviors.loader,
+        TH.behaviors.thng,
+        TH.behaviors.product,
+        TH.behaviors.actionType
       ],
 
       observers: [
         'refresh(user, thngId)'
       ],
-
-      _close: function() {
-        this.set('route.path', '');
-      },
 
       refresh: function() {
         var scope = this;
@@ -64,20 +284,132 @@
         if (this.user && this.thngId) {
           scope.set('loading', true);
 
-          this.user.thng(this.thngId)
-            .read()
+          this.readThng()
+            .then(this.readThngProperties.bind(this))
+            .then(this.readThngProduct.bind(this))
+            .then(this.readActionTypes.bind(this))
             .then(function(thng) {
               scope.thng = thng;
             })
             .catch(function() {
-              scope.$.loadingFailed.open();
+              scope.showToast('Failed to load thng');
             })
             .then(function() {
               scope.set('loading', false);
             });
         }
-      }
+      },
 
+      close: function() {
+        this.set('route.path', '');
+      },
+
+      readThng: function() {
+        return this.user.thng(this.thngId).read();
+      },
+
+      readThngProperties: function(thng) {
+        var scope = this;
+
+        return Promise.all(
+          scope._listProperties(thng).map(function(propertyName) {
+            return thng.property(propertyName).read()
+              .then(function(history) {
+                scope._addPropertyHistory(propertyName, history);
+              });
+          })
+        ).then(function() {
+          return thng;
+        });
+      },
+
+      readThngProduct: function(thng) {
+        var scope = this;
+
+        return this._readProduct(thng.product)
+          .then(function(product) {
+            thng.product = product;
+            thng.photo = scope._getProductPhoto(product);
+
+            return thng;
+          });
+      },
+
+      readActionTypes: function(thng) {
+        var scope = this;
+        return this._readActionTypes()
+          .then(function(actionTypes) {
+            scope.actionTypes = actionTypes;
+
+            return thng;
+          });
+      },
+
+      createAction: function(e) {
+        var type = e.model.item;
+        var scope = this;
+
+        if (scope.user && scope.thng) {
+          scope.set('loading', true);
+          scope.user.action(type.name).create({
+            thng: scope.thng.id
+          })
+            .then(function() {
+              scope.showToast(type.name + ' action created');
+            })
+            .catch(function() {
+              scope.showToast('Failed to create action');
+            })
+            .then(function() {
+              scope.set('loading', false);
+            });
+        }
+      },
+
+      isBigValue: function(val) {
+        if (String(val).length > 32) {
+          return 'big';
+        } else {
+          return 'small';
+        }
+      },
+
+      _thngChanged: function() {
+        var scope = this;
+
+        if (scope.thng) {
+          scope.thng.property().subscribe(function(update) {
+            update.forEach(scope._onPropertyUpdate, scope);
+          }).catch(function() {
+            scope.showToast('Failed to subscribe for properties update');
+          });
+        }
+      },
+
+      detached: function() {
+        if (this.thng) {
+          this.thng.property().unsubscribe();
+        }
+      },
+
+      _computeProps: function() {
+        return this._computeProperties(this.thng);
+      },
+
+      _onPropertyUpdate: function(update) {
+        this.set('thng.properties.' + update.key, update.value);
+        this._addPropertyHistory(update.key, update);
+      },
+
+      openProperty: function(e) {
+        var item = e.model.item;
+        var modal = document.createElement('th-edit-property-modal');
+
+        Polymer.dom(document.body).appendChild(modal);
+
+        modal.set('property', item);
+        modal.open();
+      }
     });
   </script>
 </dom-module>
