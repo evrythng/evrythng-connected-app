@@ -1,4 +1,3 @@
-
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
 
@@ -10,6 +9,9 @@
 
 <link rel="import" href="shared-styles.html">
 
+<!--
+  Modal to render and update thng's property value
+-->
 <dom-module id="th-edit-property-modal">
   <template>
     <style include="shared-styles">
@@ -113,6 +115,10 @@
       is: 'th-edit-property-modal',
 
       properties: {
+        /**
+         * Represents evrythng property entity
+         * instance of a property resource.
+         */
         property: {
           type: Object
         }
@@ -127,25 +133,49 @@
         TH.behaviors.loader
       ],
 
+      /**
+       * Reference for loader behavior
+       */
       _loaderContainer: 'paper-dialog',
 
+      /**
+       * Opens the modal, redirecting call to the modal method.
+       */
       open: function() {
         this.$.dialog.open();
       },
 
+      /**
+       * Closing the modal and cleans up the DOM
+       */
       close: function() {
         this.$.dialog.close();
         this.$.dialog.parentNode.removeChild(this.$.dialog);
       },
 
+      /**
+       * Ensures have correct height after tthe property update.
+       */
       valueChanged: function() {
         this.$.dialog.fire('iron-resize');
       },
 
+      /**
+       * Converts given timestamp to ISO time string
+       * to be consumed by local-time
+       *
+       * @param {Number} timestamp
+       * @returns {string}
+       */
       toISOString: function(timestamp) {
         return new Date(timestamp).toISOString();
       },
 
+      /**
+       * Convert
+       * @param timestamp
+       * @returns {string}
+       */
       toLocalTime: function(timestamp) {
         return new Date(timestamp).toLocaleString();
       },
@@ -154,6 +184,13 @@
         return this.toLocalTime(prop.history[0].timestamp);
       },
 
+      /**
+       * Returns generalised value size metric to be
+       * set as a styling option
+       *
+       * @param {*} value Something implementing #toString
+       * @returns {*}
+       */
       getValueSize: function(value) {
         var length = String(value).length;
 
@@ -166,12 +203,15 @@
         }
       },
 
+      /**
+       * Updates the current property with curent value in editor
+       */
       update: function() {
         var scope = this;
 
         scope.set('loading', true);
         scope.property.update(
-          this.property.type.output(this.property.value)
+          scope.property.type.output(scope.property.value)
         )
           .then(scope.close.bind(scope))
           .catch(function() {

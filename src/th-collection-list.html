@@ -8,6 +8,11 @@
 
 <link rel="import" href="shared-styles.html">
 
+<!--
+  Collections list
+  Takes the user actor and loads all collections
+  available for given search query (which is also passed in)
+-->
 <dom-module id="th-collection-list">
   <style include="shared-styles">
     :host {
@@ -49,16 +54,25 @@
 
       properties: {
 
+        /**
+         * Search query to lookup collections with
+         */
         query: {
           type: String,
           observer: 'refresh'
         },
 
+        /**
+         * Holds currently selected collection
+         */
         selectedItem: {
           type: Object,
           notify: true
         },
 
+        /**
+         * Holds EVT.User actor to made requests to the API
+         */
         user: {
           type: Object,
           observer: 'refresh'
@@ -79,11 +93,17 @@
         'refresh(filter.*)'
       ],
 
+      /**
+       * Reloads the list of collections based on current element state
+       * Reads the collections by a given search query.
+       */
       refresh: function () {
         var scope = this;
         var opts = {};
 
         if (scope.query) {
+          // Search query interpreted as entity name
+          // converting it to filters for evrythng API
           opts.params = {
             filter: 'name=' + scope.query + '*'
           };
@@ -99,18 +119,34 @@
               scope.showToast('Failed to read collections');
             })
             .then(function() {
+              // In any case, after loading is done
+              // remove the loader and ensure list knows its size
               scope.set('loading', false);
               scope.$.list.fire('iron-resize');
             });
         }
       },
 
+      /**
+       * Triggers item-selected event with payload from iron-list event.
+       *
+       * @param {CustomEvent} e
+       * @private
+       */
       _selectionChanged: function(e) {
         this.fire('item-selected', e.detail.value);
       },
 
+      /**
+       * Returns true if any collections are present. In given
+       * case, if collections are non-empty array.
+       *
+       * @param {Array} collections
+       * @returns {Boolean}
+       * @private
+       */
       _hasAnyCollections: function(collections) {
-        return collections && collections.length > 0;
+        return Boolean(collections && collections.length > 0);
       }
     });
   </script>

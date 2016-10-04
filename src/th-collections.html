@@ -4,6 +4,13 @@
 <link rel="import" href="th-collection-list.html">
 <link rel="import" href="th-collection-details.html">
 
+<!--
+  Collections page
+
+  Collection list and detail views.
+  Consumes search query and user and passing them
+  to dependent components down the line.
+-->
 <dom-module id="th-collections">
   <template>
     <style include="shared-styles">
@@ -25,8 +32,6 @@
       <th-collection-list id="list" hidden$="{{detailsActive}}" user="{{user}}" filter="{{filter}}" on-item-selected="_onCollectionSelected" query="{{query}}"></th-collection-list>
       <th-collection-details hidden$="{{!detailsActive}}" user="{{user}}" collection-id="{{collectionId}}" route="{{route}}"></th-collection-details>
     </paper-material>
-
-
   </template>
 
   <script>
@@ -34,6 +39,9 @@
       is: 'th-collections',
 
       properties: {
+        /**
+         * Holds the search query to be consumed by th-collection-list
+         */
         query: String
       },
 
@@ -44,6 +52,13 @@
         '_onIdChanged(routeData.id)'
       ],
 
+      /**
+       * Handles change of collection selected in list, by loading
+       * it to the details view via route parameter.
+       *
+       * @param {CustomEvent} e
+       * @private
+       */
       _onCollectionSelected: function(e) {
         var thng = e.detail;
 
@@ -52,14 +67,28 @@
         }
       },
 
+      /**
+       * Debounces list resize on change events.
+       * Handles path changes, which may or may not hide the list component on this page.
+       */
       fireResize: function() {
         this.debounce('fire-resize', this._fireResize, 20);
       },
 
+      /**
+       * Triggers actual list resize.
+       */
       _fireResize: function() {
         this.$.list.$.list.fire('iron-resize');
       },
 
+      /**
+       * Checks if route change was provokated on accepted page.
+       * If true, passing it down to th-collection-details
+       *
+       * @param {String} newId
+       * @private
+       */
       _onIdChanged: function(newId) {
         if (this.route.prefix === '/collections') {
           this.collectionId = newId;
