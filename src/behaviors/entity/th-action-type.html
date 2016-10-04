@@ -1,5 +1,21 @@
 <script>
+  /**
+   * Action Type behavior.
+   * Has abstract methods to compute data values
+   * from evrythng Action Type entity.
+   *
+   * @extends TH.behaviors.actionTypesCache
+   * @behavior
+   */
   TH.behaviors.actionType = [TH.behaviors.actionTypesCache, {
+
+    /**
+     * Returns display name of given action type if it defined.
+     *
+     * @param {Object} type ActionType DTO
+     * @returns {String}
+     * @private
+     */
     _getActionTypeDisplayName: function(type) {
       if (type.customFields) {
         return type.customFields.displayName || type.name;
@@ -8,6 +24,14 @@
       }
     },
 
+    /**
+     * Returns true if given action type is 'built-in'
+     * @see https://developers.evrythng.com/reference#create-an-action
+     *
+     * @param {Object} type ActionType DTO
+     * @returns {Boolean}
+     * @private
+     */
     _isBuiltInActionType: function(type) {
       if (type && type.name) {
         return type.name.indexOf('_') === 0;

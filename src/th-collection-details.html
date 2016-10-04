@@ -14,6 +14,10 @@
 <link rel="import" href="th-object-view.html">
 <link rel="import" href="shared-styles.html">
 
+<!--
+  Collection details element, takes a user and collectionId to retrieve
+  the data and render it. Allows to add/remove thngs from given collection.
+-->
 <dom-module id="th-collection-details">
   <template>
     <style include="shared-styles iron-flex">
@@ -125,12 +129,14 @@
       <container>
         <iron-list id="collectionThngs" hidden$="{{!_hasAnyThngs(collection, collection.thngs)}}" items="{{collection.thngs}}">
           <template>
-            <paper-item>
-              <span>{{item.name}}</span>
-              <span class="flex"></span>
-              <paper-icon-button icon="close" on-tap="onRemoveThngTap"></paper-icon-button>
-              <paper-ripple></paper-ripple>
-            </paper-item>
+            <a class="paper-item-link" href$="{{getThngUrl(item)}}">
+              <paper-item>
+                <span>{{item.name}}</span>
+                <span class="flex"></span>
+                <paper-icon-button icon="close" on-tap="onRemoveThngTap"></paper-icon-button>
+                <paper-ripple></paper-ripple>
+              </paper-item>
+            </a>
           </template>
         </iron-list>
 
@@ -150,8 +156,19 @@
       is: 'th-collection-details',
 
       properties: {
+        /**
+         * Holds evrythng collectionId to be loaded and rendered
+         */
         collectionId: String,
+
+        /**
+         * Holds loaded collection DTO
+         */
         collection: Object,
+
+        /**
+         * Holds Evrythng actor to perform API Requests
+         */
         user: Object
       },
 
@@ -168,6 +185,8 @@
 
       /**
        * Refreshes the element based on its current state
+       * Reads current collection, then reads its thngs and available action
+       * types, then loads it to the view.
        */
       refresh: function() {
         var scope = this;
@@ -191,14 +210,29 @@
         }
       },
 
+      /**
+       * Closes the detail by clipping the current id from a route.
+       */
       close: function() {
         this.set('route.path', '');
       },
 
+      /**
+       * Reads the collection by its id
+       *
+       * @returns {Promise}
+       */
       readCollection: function() {
         return this.user.collection(this.collectionId).read();
       },
 
+      /**
+       * Reads thngs from API, filtering them by given name
+       * Used for autocompletion.
+       *
+       * @param {String} name
+       * @returns {*}
+       */
       readThngsByName: function(name) {
         return this.user.thng().read({
           params: {
@@ -207,13 +241,22 @@
         });
       },
 
+      /**
+       * Reads the thngs of a given collection.
+       *
+       * @remark Doesn't load *all* thngs, loading only first 100 instead.
+       *   If loading of *all* entities required, consider using iterators.
+       *
+       * @param {Object} collection
+       * @returns {*|Promise}
+       */
       readCollectionThngs: function(collection) {
         return this.user.thng().read({
           params: {
             filter: {
               collections: collection.id
             },
-            perPage: 100
+            perPage: 100 // 30 by default
           }
         }).then(function(res) {
           collection.thngs = res;
@@ -221,24 +264,52 @@
         });
       },
 
+      /**
+       * Adds thng with given id to current collection.
+       *
+       * @param {String} id
+       * @returns {*}
+       */
       addThngToCollection: function(id) {
+        // TIP: Nested resources in evrythng js are acting
+        // exactly like you would expect, e.g. PUT /collection/:id/thngs
+        // is represented as collection(id).thngs().update(payload)
         return this.collection.thng().update([id]);
       },
 
+      /**
+       * Removes thng with given id from current collection
+       *
+       * @param {String} id
+       * @returns {*}
+       */
       removeThngFromCollection: function(id) {
         return this.collection.thng(id).delete();
       },
 
+      /**
+       * Reads action types from cache or API (@see TH.behaviors.actionType)
+       * and filters custom ones only. Since creating built-in actions
+       * requiring the ADI target (thng or product).
+       *
+       * @param {Object} collection
+       */
       readActionTypes: function(collection) {
         var scope = this;
         return this._readActionTypes()
           .then(function(actionTypes) {
+            // Filter using method from actionType behavior
             scope.actionTypes = actionTypes.filter(scope._isBuiltInActionType);
 
             return collection;
           });
       },
 
+      /**
+       * Creates an action on item from given event.
+       *
+       * @param {CustomEvent} e Event referencing action target in its model.
+       */
       createAction: function(e) {
         var type = e.model.item;
         var scope = this;
@@ -246,6 +317,13 @@
         if (scope.user && scope.collection) {
           scope.set('loading', true);
           scope.user.action(type.name).create({
+            // TIP: To create actions on different targets
+            // it's possible to reference thng or product ids,
+            // like:
+            // thng: scope.thng.id,
+            // product: scope.product.id
+            // Action may refer different targets at the same time.
+            // @see https://developers.evrythng.com/reference#actions-1
             collection: scope.collection.id
           })
             .then(function() {
@@ -260,6 +338,12 @@
         }
       },
 
+      /**
+       * Class computed binding. Returns class of a value by size criteria.
+       *
+       * @param {*} val Any entity implmenting #toString
+       * @returns {*}
+       */
       isBigValue: function(val) {
         if (String(val).length > 32) {
           return 'big';
@@ -268,10 +352,22 @@
         }
       },
 
+      /**
+       * Debounces actual autocomplete to happen only when
+       * last key was pressed.
+       * Since autocomplete itself is asynchronous and therefore expensive operation, allows
+       * to avoid too often trigger.
+       */
       debounceAutocomplete: function() {
         this.debounce('thngs-autocomplete', this._doAutocomplete, 300);
       },
 
+      /**
+       * Handles selection of thng in autocomplete.
+       * Adds selected thng to a current collection.
+       *
+       * @param {CustomEvent} e Event holding selected thng in details.
+       */
       onThngSelected: function(e) {
         var scope = this;
         var thng = e.detail.value;
@@ -279,7 +375,10 @@
         scope.set('loading', true);
         scope.addThngToCollection(thng.id)
           .then(function() {
+            // Do cleanup after thng successfully added.
             scope.$.thngsSearch.text = '';
+
+            // Add the new thng to existing ones
             scope.unshift('collection.thngs', thng);
             scope.showToast('Thng ' + thng.name + ' added to collection');
             scope.fireResize();
@@ -292,9 +391,17 @@
           });
       },
 
+      /**
+       * Handles tap on remove icon on thng, by removing the given
+       * thng from a current collectin. If succeed also removes the
+       * @param e
+       */
       onRemoveThngTap: function(e) {
         var scope = this;
         var thng = e.model.item;
+
+        e.stopPropagation();
+        e.preventDefault();
 
         scope.removeThngFromCollection(thng.id)
           .then(function () {
@@ -312,6 +419,12 @@
           });
       },
 
+      /**
+       * Does actual autocomplete. Looks for thngs in platform by query name,
+       * then transforms the response to format of paper-autocomplete.
+       *
+       * @private
+       */
       _doAutocomplete: function() {
         var scope = this;
         var input = scope.$.thngsSearch;
@@ -342,10 +455,19 @@
           });
       },
 
+      /**
+       * Explicit interface for parent components.
+       */
       fireResize: function() {
         this.$.collectionThngs.fire('iron-resize');
-      }
+      },
 
+      /**
+       * Returns a href to reference given thng in application
+       */
+      getThngUrl: function(thng) {
+        return '/thngs/' + thng.id;
+      }
 
     });
   </script>

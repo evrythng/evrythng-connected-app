@@ -3,16 +3,25 @@
     var _productCache = {};
 
     /**
-     * Caches requested products.
+     * Caches requested products if requested with this behavior.
      *
      * @behavior
      */
     TH.behaviors.productCache = {
 
+      /**
+       * Straightforward async memo function.
+       *
+       * @param {String} id
+       * @returns {Promise}
+       * @private
+       */
       _readProduct: function(id) {
         if (_productCache[id]) {
+          // Found in cache, resolve
           return Promise.resolve(_productCache[id]);
         } else {
+          // Do a request to API
           return this.user.product(id).read()
             .then(function(product) {
               return _productCache[id] = product;

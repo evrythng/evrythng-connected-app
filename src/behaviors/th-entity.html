@@ -1,5 +1,13 @@
 <script>
 
+  /**
+   * Abstract entity behavior to implement some of typical abstract
+   * EVRYTHNG entity features. E.g. custom fields, identifiers, tags.
+   * Allows to write less computed bindings in templates.
+   *
+   * @extends TH.behaviors.objectProperties
+   * @behavior
+   */
   TH.behaviors.entity = [ TH.behaviors.objectProperties, {
 
     /**

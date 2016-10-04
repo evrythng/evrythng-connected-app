@@ -2,6 +2,12 @@
   (function() {
     var scrollTarget;
 
+    /**
+     * Allows different nested elements access to a same scroll target.
+     * Allows to decouple children elements from surrounding markup.
+     *
+     * @behavior
+     */
     TH.behaviors.scrollTarget = {
       setScrollTarget: function(target) {
         scrollTarget = target;

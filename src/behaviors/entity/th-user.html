@@ -4,29 +4,51 @@
    * Has abstract methods to compute and retrieve the data values
    * from user model.
    *
+   * @extends TH.behaviors.objectProperties
    * @behavior
    */
   TH.behaviors.user = [ TH.behaviors.objectProperties, {
 
+    /**
+     * @see Polymer.Base.properties
+     */
     properties: {
+      /**
+       * Holds the user this behavior is wrapping
+       */
       user: Object,
 
+      /**
+       * Computes full name of a user when it changes.
+       */
       fullName: {
         type: String,
         computed: 'computeFullName(user)'
       },
 
+      /**
+       * Computes initials of a user when it changes.
+       */
       initials: {
         type: String,
         computed: 'computeInitials(user)'
       },
 
+      /**
+       * Computes photo of a user when it changes.
+       */
       photo: {
         type: String,
         computed: 'computePhoto(user)'
       }
     },
 
+    /**
+     * Takes the User dto, tries to get initials.
+     *
+     * @param {Object} user
+     * @returns {String}
+     */
     computeInitials: function(user) {
       var output = '';
 
@@ -37,6 +59,13 @@
       return output;
     },
 
+    /**
+     * Takes the user dto, tries to get user full name either from
+     * facebook info or from evrythng entity itself.
+     *
+     * @param {Object} user
+     * @returns {String}
+     */
     computeFullName: function(user) {
       var output = '';
 
@@ -50,6 +79,11 @@
       return output;
     },
 
+    /**
+     * Returns user photo (url to it) if one is present.
+     *
+     * @returns {String}
+     */
     computePhoto: function(user) {
       return user && user.photo;
     }

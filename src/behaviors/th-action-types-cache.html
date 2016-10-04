@@ -4,16 +4,24 @@
     var _actionTypesCache;
 
     /**
-     * Caches requested products.
+     * Caches requested action types.
      *
      * @behavior
      */
     TH.behaviors.actionTypesCache = {
 
+      /**
+       * Straightforward async memo function.
+       *
+       * @returns {Promise}
+       * @private
+       */
       _readActionTypes: function() {
         if (_actionTypesCache) {
+          // Were requested before, resolve
           return Promise.resolve(_actionTypesCache);
         } else {
+          // Do an API request
           return this.user.actionType().read()
             .then(function(actionTypes) {
               return _actionTypesCache = actionTypes;

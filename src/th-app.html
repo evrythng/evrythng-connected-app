@@ -39,16 +39,6 @@
         display: block;
       }
 
-      app-drawer-layout {
-        transition: all .5s ease;
-        transform-origin: bottom;
-        overflow: hidden;
-        height: 100vh;
-        background-color: var(--paper-grey-200);
-
-        @apply(--shadow-elevation-16dp);
-      }
-
       :host(.with-dev-tool) app-drawer-layout {
         height: 50vh;
         transform: scale(.96);
@@ -282,6 +272,9 @@
         if (settings) {
           settings = this.settings;
 
+          // TIP: Typically, evrythng.js and its plugins
+          // have setup method to apply different settings.
+          // This method can be called at any time with updated configuration.
           EVT.WS.setup({
             apiUrl: settings.wsApiUrl
           });

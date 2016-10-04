@@ -5,6 +5,12 @@
     var toast = document.createElement('paper-toast');
     Polymer.dom(document.body).appendChild(toast);
 
+    /**
+     * Makes any element a "toaster", adding showToast(String text) method.
+     *
+     * @type {Object}
+     * @behavior
+     */
     TH.behaviors.showToast = {
       showToast: function (text) {
         toast.text = text;

@@ -1,5 +1,20 @@
 <script>
+  /**
+   * Product behavior.
+   * Has abstract methods to compute and retrieve the data values
+   * from evrythng product entity.
+   *
+   * @extends TH.behaviors.productCache
+   * @behavior
+   */
   TH.behaviors.product = [ TH.behaviors.productCache, {
+    /**
+     * Returns photo of a given product if one is present.
+     *
+     * @param {Object} product
+     * @returns {String}
+     * @private
+     */
     _getProductPhoto: function(product) {
       if (product && product.photos) {
         return product.photos[0];

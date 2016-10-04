@@ -1,7 +1,27 @@
 <script>
+  /**
+   * Collection behavior.
+   * Has abstract methods to compute data values
+   * from evrythng Collection entity.
+   *
+   * @extends TH.behaviors.entity
+   * @behavior
+   */
   TH.behaviors.collection = [TH.behaviors.entity, {
+
+    /**
+     * @see TH.behaviors.entity.name
+     */
     name: 'collection',
 
+    /**
+     * Returns true if given collection have any thngs assigned.
+     * @remark Doesn't do actual thngs fetching. Serves as a computed binding wrapper.
+     *
+     * @param {Object} collection
+     * @returns {Boolean}
+     * @private
+     */
     _hasAnyThngs: function(collection) {
       return Boolean(collection && collection.thngs);
     }

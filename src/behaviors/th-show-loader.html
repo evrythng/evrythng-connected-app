@@ -31,8 +31,13 @@
       }
     },
 
+    /**
+     * Tracks change of 'loading' element's property,
+     * adding or removing spinner from the view.
+     */
     _onLoadingChanged: function() {
       if (!this.spinner) {
+        // Create spinner if it's not exist
         this._createSpinner();
       }
 
@@ -40,6 +45,10 @@
       this.spinner.active = this.loading;
     },
 
+    /**
+     * Creates spinner element with appropriate styling
+     * @private
+     */
     _createSpinner: function() {
       this.spinner = document.createElement('paper-spinner');
       this.spinner.active = false;

@@ -1,8 +1,9 @@
 <script>
   /**
    * Thng behavior.
-   * Has abstract methods to retrieve the data values from thng model.
+   * Has abstract methods to retrieve, store and process the data values from thng model.
    *
+   * @extends TH.behaviors.entity
    * @behavior
    */
   TH.behaviors.thng = [ TH.behaviors.entity, {
@@ -68,7 +69,11 @@
     },
 
     /**
-     * Computes type of given property.
+     * Computes type of given value.
+     * Returns some additional metadata alongside with it. Metadata
+     * allows to avoid additional computed properties/bindings in dependent components
+     *
+     * @param {*} value
      */
     _getPropertyType: function(value) {
       var typ = this._typ(value);
@@ -88,6 +93,9 @@
       return type;
     },
 
+    /**
+     * Returns property history if it found in cache.
+     */
     _getPropertyHistory: function(prop) {
       var target = this._propertiesHistory[prop.name];
 
@@ -119,6 +127,14 @@
       }, this);
     },
 
+    /**
+     * Adds given records to a history of updates of property with given name.
+     * Maintains the maximum history size at static last 30 items.
+     *
+     * @param {String} name
+     * @param {Object|Object[]} records
+     * @private
+     */
     _addPropertyHistory: function(name, records) {
       var target;
 
