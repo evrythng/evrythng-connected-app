@@ -39,7 +39,8 @@
     "paper-material": "^1.0.6",
     "paper-autocomplete": "^1.1.4",
     "voice-elements": "^1.0.0",
-    "iron-scroll-threshold": "^1.0.2"
+    "iron-scroll-threshold": "^1.0.2",
+    "renderjson": "^1.2.2"
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"

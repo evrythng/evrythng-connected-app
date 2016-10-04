@@ -1,7 +1,9 @@
 <link rel="import" href="../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../bower_components/iron-localstorage/iron-localstorage.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
 
 <link rel="import" href="shared-styles.html">
+<link rel="import" href="th-json-renderer.html">
 
 <dom-module id="th-evt-debug">
   <template>
@@ -9,9 +11,26 @@
       :host {
         @apply(--layout-block);
         @apply(--layout-fixed-bottom);
+        @apply(--dark-theme);
 
         transition: all .3s ease;
-        transform: translateY(100%);
+        transform: translateY(110%);
+
+        --json-theme-link: var(--paper-grey-400);
+        --json-theme-disclosure: var(--paper-grey-400);
+        --json-theme-syntax: var(--paper-grey-600);
+        --json-theme-string: var(--paper-green-300);
+        --json-theme-number: var(--paper-blue-400);
+        --json-theme-boolean: var(--paper-amber-500);
+        --json-theme-key: var(--paper-grey-400);
+        --json-theme-keyword: var(--paper-amber-500);
+
+        --text-base-color: var(--paper-grey-50);
+        --background-base-color: var(--paper-grey-900);
+
+        --code-font: {
+          font-family: monospace;
+        }
       }
 
       :host(.opened) {
@@ -19,26 +38,62 @@
       }
 
       container {
+        @apply(--layout-vertical);
+        @apply(--code-font);
+
         display: block;
 
         height: 50vh;
-        background-color: var(--paper-grey-50);
-        box-shadow: 0 -20px 70px rgba(0, 0, 0, .2);
-        transform: translateY(0);
+        overflow: auto;
+
+        background-color: var(--background-base-color);
+        color: var(--text-base-color);
+
+
+        box-shadow: 0 -20px 70px rgba(0, 0, 0, .6);
       }
 
-      h1 {
-        font-weight: lighter;
-        margin: var(--app-unit-sm);
+      th-json-renderer {
+        margin-bottom: var(--app-unit-xs);
+      }
+
+      .tools {
+        position: absolute;
+        right: 0;
+        top: 0;
+
+        text-align: right;
+        color:  var(--text-base-color);
+        padding: var(--app-unit-md) var(--app-unit-lg);
+      }
+
+      .stats {
+        @apply(--code-font);
       }
 
     </style>
 
-    <container>
-      <h1>Trace</h1>
+    <container id="scroller">
+      <template is="dom-repeat" items="{{events}}">
+        <div>
+          <span>&gt;</span><span>{{item.type}}</span>
+          <span>{{item.payload.url}}</span>
+          <th-json-renderer json="[[item.payload]]"></th-json-renderer>
+        </div>
+      </template>
     </container>
 
-    <iron-localstorage name="th-devtool-opened" value="{{opened}}" on-iron-localstorage-load-empty="_setFalse"></iron-localstorage>
+    <div class="tools">
+      <div class="toolbar">
+        <paper-icon-button icon="th:eraser" on-tap="clean"></paper-icon-button>
+        <paper-icon-button icon="close" on-tap="close"></paper-icon-button>
+      </div>
+      <div class="stats">
+        <span>total: </span><span>{{total}}</span>
+      </div>
+    </div>
+
+    <iron-localstorage name="th-devtool-opened" value="{{opened}}" on-iron-localstorage-load-empty="close"></iron-localstorage>
 
   </template>
   <script>
@@ -49,6 +104,16 @@
         opened: {
           type: Boolean,
           observer: '_onOpenedChanged'
+        },
+
+        events: {
+          type: Array,
+          value: []
+        },
+
+        total: {
+          type: Number,
+          value: 0
         }
       },
 
@@ -59,6 +124,7 @@
         }
       },
 
+      // TODO: Remove when fix released
       patchEVT: function() {
         var scope = this;
         var original = EVT.api;
@@ -67,8 +133,8 @@
           options = options || {};
           options.interceptors = options.interceptors || [];
           options.interceptors.push({
-            request: scope.logRequest,
-            response: scope.logResponse
+            request: scope.logRequest.bind(scope),
+            response: scope.logResponse.bind(scope)
           });
 
           return original(options);
@@ -76,22 +142,53 @@
       },
 
       logRequest: function(opts) {
-        console.log(opts);
+        this.inc('total', +1);
+        this.log({
+          type: 'REQUEST',
+          payload: opts
+        });
       },
 
       logResponse: function(opts) {
-        console.log(opts);
+        this.log({
+          type: 'RESPONSE',
+          payload: opts
+        });
 
         return opts;
+      },
+
+      inc: function(vr, inc) {
+        this.set(vr, this[vr] + inc);
+      },
+
+      log: function(obj) {
+        this.push('events', obj);
+        this.ensureFull();
+
+        this.async(function() {
+          this.$.scroller.scrollTop = this.$.scroller.scrollHeight;
+        });
+      },
+
+      ensureFull: function() {
+        if (this.events.length > 100) {
+          this.splice('events', this.events.length - 1, 1);
+        }
+      },
+
+      clean: function() {
+        this.splice('events', 0, this.events.length);
+        this.set('total', 0);
+      },
+
+      close: function() {
+        this.set('opened', false);
       },
 
       _onOpenedChanged: function(opened) {
         this.classList.toggle('opened', opened);
         this.fire('state-changed', opened);
-      },
-
-      _setFalse: function() {
-        this.opened = false;
       }
     });
   </script>

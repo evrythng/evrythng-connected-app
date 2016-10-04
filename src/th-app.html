@@ -182,7 +182,7 @@
       },
 
       observers: [
-        'setupEVT(settings)',
+        'setupEVT(settings.*)',
         '_routePageChanged(routeData.page)',
         '_onTargetEnvironmentChange(settings.remote)'
       ],
@@ -280,6 +280,8 @@
        */
       setupEVT: function(settings) {
         if (settings) {
+          settings = this.settings;
+
           EVT.WS.setup({
             apiUrl: settings.wsApiUrl
           });

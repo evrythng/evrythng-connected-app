@@ -1,0 +1,83 @@
+<script src="../bower_components/renderjson/renderjson.js"></script>
+<script>
+  renderjson.set_icons('+', '-');
+</script>
+
+<dom-module id="th-json-renderer">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      .renderjson {
+        line-height: 1em;
+      }
+
+      .renderjson a {
+        text-decoration: none;
+        color: var(--json-theme-link);
+      }
+
+      .renderjson .disclosure {
+        color: var(--json-theme-disclosure);
+
+        font-size: 1.5em;
+        position: relative;
+        top: 1px;
+      }
+
+      .renderjson .syntax {
+        color: var(--json-theme-syntax);
+      }
+
+      .renderjson .string {
+        color: var(--json-theme-string);
+      }
+
+      .renderjson .number {
+        color: var(--json-theme-number);
+      }
+
+      .renderjson .boolean {
+        color: var(--json-theme-boolean);
+      }
+
+      .renderjson .key {
+        color: var(--json-theme-key);
+      }
+
+      .renderjson .keyword {
+        color: var(--json-theme-keyword);
+      }
+
+      .renderjson .object.syntax {
+        color: var(--json-theme-syntax);
+      }
+
+      .renderjson .array.syntax {
+        color: var(--json-theme-syntax);
+      }
+    </style>
+
+    <container id="container"></container>
+  </template>
+  <script>
+    Polymer({
+      is: 'th-json-renderer',
+
+      properties: {
+        json: {
+          type: Object,
+          observer: 'jsonChanged'
+        }
+      },
+
+      jsonChanged: function() {
+        this.$.container.appendChild(
+          renderjson(this.json)
+        );
+      }
+    });
+  </script>
+</dom-module>

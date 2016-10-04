@@ -1,6 +1,7 @@
 <link rel="import" href="../bower_components/voice-elements/dist/voice-recognition.html">
 
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-material/paper-material.html">
@@ -38,6 +39,17 @@
       #searchPlate paper-input {
         @apply(--layout-flex);
       }
+
+      .recognition {
+        position: relative;
+      }
+
+      .recognition .state {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        transform: scale(.5);
+      }
     </style>
 
     <paper-icon-button id="trigger" icon="search"></paper-icon-button>
@@ -46,7 +58,11 @@
       <paper-icon-button id="close" icon="arrow-upward"></paper-icon-button>
       <paper-input no-label-float label="Search" value="{{raw}}"></paper-input>
       <paper-icon-button id="clean" icon="close" hidden$="{{!_hasValue(raw)}}"></paper-icon-button>
-      <paper-icon-button id="listen" icon="th:microphone"></paper-icon-button>
+      <span class="recognition" hidden$="{{!isRecognitionAvailable()}}">
+        <paper-icon-button id="listen" icon="th:microphone"></paper-icon-button>
+        <iron-icon class="state" icon="{{recognitionState}}"></iron-icon>
+      </span>
+
     </paper-material>
 
     <voice-recognition id="voiceRecognition"></voice-recognition>
@@ -64,6 +80,11 @@
         raw: {
           type: String,
           observer: 'debounceUpdate'
+        },
+
+        recognitionState: {
+          type: String,
+          value: 'ready'
         }
       },
 
@@ -72,12 +93,13 @@
       },
 
       ready: function() {
+
         this.async(function() {
           this.$.trigger.addEventListener('tap', this.openSearch.bind(this));
           this.$.close.addEventListener('tap', this.closeSearch.bind(this));
           this.$.listen.addEventListener('tap', this.recognise.bind(this));
           this.$.clean.addEventListener('tap', this.clean.bind(this));
-        })
+        });
       },
 
       openSearch: function() {
@@ -89,7 +111,15 @@
       },
 
       recognise: function() {
-        this.$.voiceRecognition.start();
+        if (!this.recognising) {
+          this.$.voiceRecognition.start();
+          this.recognising = true;
+          this.recognitionState = 'th:record';
+        } else {
+          this.$.voiceRecognition.abort();
+          this.recognising = false;
+          this.recognitionState = 'ready';
+        }
       },
 
       clean: function() {
@@ -101,11 +131,26 @@
       },
 
       setRaw: function(e) {
+        var scope = this;
         var query = e.detail.result;
 
         this.set('raw', query);
+        this.recognising = false;
+        this.recognitionState = 'check';
         this.$.voiceRecognition.stop();
         this.$.voiceRecognition.set('text', '');
+
+        setTimeout(function() {
+          scope.recognitionState = 'ready';
+        }, 1200);
+      },
+
+      isRecognitionAvailable: function() {
+        return window.SpeechRecognition ||
+          window.webkitSpeechRecognition ||
+          window.mozSpeechRecognition ||
+          window.msSpeechRecognition ||
+          window.oSpeechRecognition;
       },
 
       _doUpdate: function() {
