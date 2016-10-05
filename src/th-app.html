@@ -1,5 +1,5 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
-<link rel="import" href="../bower_components/iron-localstorage/iron-localstorage.html">
+
 <link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
@@ -8,11 +8,16 @@
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/app-route/app-location.html">
 <link rel="import" href="../bower_components/app-route/app-route.html">
+
 <link rel="import" href="../bower_components/iron-icon/iron-icon.html">
 <link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
+<link rel="import" href="../bower_components/iron-localstorage/iron-localstorage.html">
+
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
 
 <script src="../bower_components/lodash/lodash.js"></script>
 <script src="../bower_components/evrythng/dist/evrythng.js"></script>
@@ -124,6 +129,14 @@
 
     <th-login id="loginForm" hidden$="[[_isReady(app, user)]]" loading="{{loading}}" on-login="_onLogin"></th-login>
     <th-evt-debug id="debugTool" on-state-changed="_onDevToolStateChanged"></th-evt-debug>
+    <paper-dialog id="resetSettings">
+      <h2>Configuration error</h2>
+      <p>Do you want to reset settings to defaults?</p>
+      <div class="buttons">
+        <paper-button dialog-dismiss>No</paper-button>
+        <paper-button on-tap="resetSettings">Yes</paper-button>
+      </div>
+    </paper-dialog>
   </template>
 
   <script>
@@ -234,18 +247,23 @@
        * @see Polymer.Base#ready
        */
       ready: function() {
-        this.set('loading', true);
+        var scope = this;
+
+        scope.set('loading', true);
 
         // Initialise EVT.js after
         // settings are read from storage and all children elements are ready.
-        this.async(function() {
+        scope.async(function() {
           // TIP: Quite typical flow, creating javascript applications
           // is to init the evrythng.js with correct settings and then
           // create an "actionable" object, e.g. App, User or Operator
-          this.initEVT();
-          this.initApp();
+          scope.initEVT();
+          scope.initApp()
+            .then(function() {
+              scope.set('loading', false);
+            });
 
-          this.storeScrollingTarget();
+          scope.storeScrollingTarget();
         });
       },
 
@@ -304,7 +322,7 @@
         // TIP: EVT.App exposes $init property,
         // containing a promise, allowing to wait till
         // the application is ready for action
-        app.$init.then(function() {
+        return app.$init.then(function() {
           // TODO: remove after fix released
           return scope._initFacebook(app.socialNetworks.facebook.appId)
             .then(function (response) {
@@ -327,7 +345,11 @@
             }
 
             scope.set('app', app);
-            scope.set('loading', false);
+          })
+          .catch(function(e) {
+            // Failed to instantiate an application,
+            // this may be caused by a configuration error
+            scope.$.resetSettings.open();
           });
       },
 
@@ -505,6 +527,23 @@
        */
       _setDefaultSettings: function() {
         this.settings = this.defaultSettings;
+      },
+
+      /**
+       * Handles unsuccessful start of application after incorrect
+       * configuration.
+       */
+      resetSettings: function() {
+        var scope = this;
+
+        scope.$.resetSettings.close();
+        scope._setDefaultSettings();
+        scope.set('loading', true);
+
+        this.initApp()
+          .then(function() {
+            scope.set('loading', false);
+          });
       },
 
       // TODO: Remove when fix released

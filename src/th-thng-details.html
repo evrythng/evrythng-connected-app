@@ -286,6 +286,7 @@
 
         if (this.user && this.thngId) {
           scope.set('loading', true);
+          scope.set('thng', null);
 
           this.readThng()
             .then(this.readThngProperties.bind(this))

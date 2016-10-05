@@ -19,6 +19,7 @@
         @apply(--dark-theme);
 
         transition: all .3s ease;
+        /* +10% to hide the shadow */
         transform: translateY(110%);
 
         --json-theme-link: var(--paper-grey-400);
@@ -32,10 +33,6 @@
 
         --text-base-color: var(--paper-grey-50);
         --background-base-color: var(--paper-grey-900);
-
-        --code-font: {
-          font-family: monospace;
-        }
       }
 
       :host(.opened) {
@@ -44,7 +41,7 @@
 
       container {
         @apply(--layout-vertical);
-        @apply(--code-font);
+        @apply(--app-code-font);
 
         display: block;
 
@@ -54,7 +51,7 @@
         background-color: var(--background-base-color);
         color: var(--text-base-color);
 
-
+        /* Non-material shadow to be pointed upwards */
         box-shadow: 0 -20px 70px rgba(0, 0, 0, .6);
       }
 
@@ -73,7 +70,7 @@
       }
 
       .stats {
-        @apply(--code-font);
+        @apply(--app-code-font);
       }
 
     </style>
@@ -81,7 +78,7 @@
     <container id="scroller">
       <template is="dom-repeat" items="{{events}}">
         <div>
-          <span>&gt;</span><span>{{item.type}}</span>
+          <span>&gt; </span><span>{{item.type}}</span>
           <span>{{item.payload.url}}</span>
           <th-json-renderer json="[[item.payload]]"></th-json-renderer>
         </div>
