@@ -13,6 +13,12 @@
 
 <link rel="import" href="shared-styles.html">
 
+<!--
+  Simple user card
+
+  Renders user photo or initials if one missing.
+  Opens actions menu on click.
+-->
 <dom-module id="th-user">
   <template>
     <style include="iron-flex shared-styles">
@@ -124,6 +130,9 @@
         horizontal: 8
       },
 
+      /**
+       * Prepares and opens the dropdown
+       */
       open: function() {
         var dropdown = this.$.dropdown;
 
@@ -133,11 +142,25 @@
         dropdown.open();
       },
 
+      /**
+       * Triggers the application logout
+       * dispatching appropriate event.
+       *
+       * @param {CustomEvent} e
+       * @private
+       */
       _logout: function(e) {
         this.$.dropdown.close();
         this.fire('logout');
       },
 
+      /**
+       * Returns true if given user has a photo.
+       *
+       * @param {Object} user
+       * @returns {Boolean}
+       * @private
+       */
       _hasPhoto: function(user) {
         return Boolean(user && user.photo);
       }

@@ -11,31 +11,27 @@
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="th-loader.html">
 
+<!--
+  Login splash screen, visible when app is not ready,
+  e.g. in loading state, or have no authenticated user available.
+
+  Overlays the whole screen.
+-->
 <dom-module id="th-login">
   <template>
     <style include="iron-flex">
       :host {
+        @apply(--layout);
+        @apply(--layout-fit);
+        @apply(--layout-center-center);
+
         position: fixed;
 
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-
-        display: flex;
-        align-items: center;
-        justify-content: center;
         z-index: 103;
         background: var(--paper-grey-100);
       }
 
-      container {
-        @apply(--shadow-elevation-16dp);
-        background: white;
-        padding: 8px;
-      }
-
-      paper-dialog {
+      #loginForm {
         max-width: 400px;
         width: 90vw;
       }
@@ -72,31 +68,54 @@
       is: 'th-login',
 
       properties: {
+        /**
+         * Defines if loader visible
+         */
         loading: {
           type: Boolean,
           value: true
         },
 
+        /**
+         * Stores creds before dispatching them in event
+         */
         creds: {
           type: Object,
           value: {}
         }
       },
 
-      _loginWithCreds: function(){
-        this.fire('login', this.creds);
-      },
-
-      _loginWithFacebook: function() {
-        this.fire('login', 'facebook');
-      },
-
+      /**
+       * Opens login modal, allowing to login either with User creds
+       * or via facebook.
+       */
       open: function() {
         this.$.loginForm.open();
       },
 
+      /**
+       * Closes modal
+       */
       close: function() {
         this.$.loginForm.close();
+      },
+
+      /**
+       * Dispatches login with given creds
+       *
+       * @private
+       */
+      _loginWithCreds: function(){
+        this.fire('login', this.creds);
+      },
+
+      /**
+       * Dispatches login with facebook
+       *
+       * @private
+       */
+      _loginWithFacebook: function() {
+        this.fire('login', 'facebook');
       }
     });
   </script>

@@ -13,6 +13,11 @@
 <link rel="import" href="th-post-action-modal.html">
 <link rel="import" href="shared-styles.html">
 
+<!--
+  Thng details page. Loads the thng by its id,
+  and renders its static and dynamic fields.
+  Shows thng properties and allows to create actions on a thng.
+-->
 <dom-module id="th-thng-details">
   <template>
     <style include="shared-styles iron-flex">
@@ -246,19 +251,32 @@
        * @see Polymer.Base.properties
        */
       properties: {
+        /**
+         * EVRYTHNG id of a thng to be loaded
+         */
         thngId: {
           type: String
         },
 
+        /**
+         * Thng entity, received from API
+         */
         thng: {
           type: Object,
           observer: '_thngChanged'
         },
 
+        /**
+         * EVT.User instance, allows to act on behalf of a user
+         */
         user: {
           type: Object
         },
 
+        /**
+         * Computed array of thng properties to be
+         * iterated over with dom-repeat
+         */
         props: {
           type: Array,
           computed: '_computeProps(thng.properties.*)'
@@ -278,6 +296,9 @@
         'refresh(user, thngId)'
       ],
 
+      /**
+       * Refreshes the view with current element configuration
+       */
       refresh: function() {
         var scope = this;
 
@@ -285,6 +306,9 @@
           scope.set('loading', true);
           scope.set('thng', null);
 
+          // Apart from thng DTO we need to read
+          // - its product (for photo)
+          // - its properties (for their history)
           this.readThng()
             .then(this.readThngProperties.bind(this))
             .then(this.readThngProduct.bind(this))
@@ -301,14 +325,27 @@
         }
       },
 
+      /**
+       * Resets the thng id closing this view.
+       */
       close: function() {
         this.set('route.path', '');
       },
 
+      /**
+       * Reads current thng from evrythng API
+       * @returns {Promise}
+       */
       readThng: function() {
         return this.user.thng(this.thngId).read();
       },
 
+      /**
+       * Reads all thng properties with their history from the API
+       *
+       * @param {Object} thng evrythng.js thng instance (from readThng)
+       * @returns {Promise}
+       */
       readThngProperties: function(thng) {
         var scope = this;
 
@@ -324,9 +361,16 @@
         });
       },
 
+      /**
+       * Reads thng's product from the API
+       *
+       * @param {Object} thng evrythng.js thng instance
+       * @returns {Promise}
+       */
       readThngProduct: function(thng) {
         var scope = this;
 
+        // Read using the caching behavior.
         return this._readProduct(thng.product)
           .then(function(product) {
             thng.product = product;
@@ -336,8 +380,14 @@
           });
       },
 
+      /**
+       * Tries to read action types from API or cache if available
+       *
+       * @param {Object} thng
+       */
       readActionTypes: function(thng) {
         var scope = this;
+        // Read using the caching behavior.
         return this._readActionTypes()
           .then(function(actionTypes) {
             scope.actionTypes = actionTypes;
@@ -346,27 +396,11 @@
           });
       },
 
-      createAction: function(e) {
-        var type = e.model.item;
-        var scope = this;
-
-        if (scope.user && scope.thng) {
-          scope.set('loading', true);
-          scope.user.action(type.name).create({
-            thng: scope.thng.id
-          })
-            .then(function() {
-              scope.showToast(type.name + ' action created');
-            })
-            .catch(function() {
-              scope.showToast('Failed to create action');
-            })
-            .then(function() {
-              scope.set('loading', false);
-            });
-        }
-      },
-
+      /**
+       * Returns value class by size criteria
+       * @param {*} val anytihng with #toString
+       * @returns {String}
+       */
       isBigValue: function(val) {
         if (String(val).length > 64) {
           return 'big';
@@ -375,6 +409,12 @@
         }
       },
 
+      /**
+       * Reacts to change of thng in element,
+       * subscribing to new thng properties.
+       *
+       * @private
+       */
       _thngChanged: function() {
         var scope = this;
 
@@ -387,27 +427,55 @@
         }
       },
 
+      /**
+       * Unsubscribes from thng properties updates
+       * when detached from dom
+       */
       detached: function() {
         if (this.thng) {
           this.thng.property().unsubscribe();
         }
       },
 
+      /**
+       * Computes thng properties list.
+       *
+       * @returns {Object[]}
+       * @private
+       */
       _computeProps: function() {
         return this._computeProperties(this.thng);
       },
 
+      /**
+       * Reacts to thng property update, setting
+       * the new value to current thng dto and adding new value
+       * to the property history cache.
+       *
+       * @param {Object} update
+       * @private
+       */
       _onPropertyUpdate: function(update) {
         this.set('thng.properties.' + update.key, update.value);
         this._addPropertyHistory(update.key, update);
       },
 
+      /**
+       * Opens property modal
+       *
+       * @param {CustomEvent} e
+       */
       openProperty: function(e) {
         this.openModal('th-edit-property-modal', {
           property: e.model.item
         });
       },
 
+      /**
+       * Opens action modal
+       *
+       * @param {CustomEvent} e
+       */
       openAction: function(e) {
         this.openModal('th-post-action-modal', {
           type: e.model.item,

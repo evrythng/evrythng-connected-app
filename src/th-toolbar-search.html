@@ -9,6 +9,12 @@
 
 <link rel="import" href="shared-styles.html">
 
+<!--
+  Toolbar search overlay.
+
+  Simple component with a string output.
+  Supports voice search via Chrome Speech API
+-->
 <dom-module id="th-toolbar-search">
   <template>
     <style include="iron-flex shared-styles">
@@ -72,16 +78,25 @@
       is: 'th-toolbar-search',
 
       properties: {
+        /**
+         * Output value of a component, search query
+         */
         query: {
           type: String,
           notify: true
         },
 
+        /**
+         * Raw search value to be dispatched to actual output (query) property
+         */
         raw: {
           type: String,
           observer: 'debounceUpdate'
         },
 
+        /**
+         * Stores the current recognition state (and icon) in string
+         */
         recognitionState: {
           type: String,
           value: 'ready'
@@ -89,11 +104,19 @@
       },
 
       listeners: {
-        'voiceRecognition.result': 'setRaw'
+        'voiceRecognition.result': 'setRaw',
+        'voiceRecognition.error': 'recognitionFailed'
       },
 
-      ready: function() {
+      behaviors: [
+        TH.behaviors.showToast
+      ],
 
+      /**
+       * Imperatively assigns necessary listeners,
+       * avoiding mess with app-header-layout
+       */
+      ready: function() {
         this.async(function() {
           this.$.trigger.addEventListener('tap', this.openSearch.bind(this));
           this.$.close.addEventListener('tap', this.closeSearch.bind(this));
@@ -102,14 +125,23 @@
         });
       },
 
+      /**
+       * Opens search overlay
+       */
       openSearch: function() {
         this.$.searchPlate.classList.add('visible');
       },
 
+      /**
+       * Closes search overlay
+       */
       closeSearch: function() {
         this.$.searchPlate.classList.remove('visible');
       },
 
+      /**
+       * Toggles the voice recognition, starting new or aborting pending.
+       */
       recognise: function() {
         if (!this.recognising) {
           this.$.voiceRecognition.start();
@@ -122,14 +154,26 @@
         }
       },
 
+      /**
+       * Cleans the component text field
+       */
       clean: function() {
         this.set('raw', '');
       },
 
+      /**
+       * Method triggered on each raw value update.
+       * Allows to avoid the 'Prellen' effect.
+       */
       debounceUpdate: function() {
         this.debounce('query-update', this._doUpdate, 400);
       },
 
+      /**
+       * Sets the raw query as per recognition result.
+       *
+       * @param {CustomEvent} e recognition result event
+       */
       setRaw: function(e) {
         var scope = this;
         var query = e.detail.result;
@@ -140,26 +184,58 @@
         this.$.voiceRecognition.stop();
         this.$.voiceRecognition.set('text', '');
 
+        // Check icon will be shown for 1.5s
+        // then replaced with intial one
         setTimeout(function() {
           scope.recognitionState = 'ready';
-        }, 1200);
+        }, 1500);
       },
 
+      /**
+       * Returns true if speech recognition API is present in
+       * current environment.
+       *
+       * @returns {Boolean}
+       */
       isRecognitionAvailable: function() {
-        return window.SpeechRecognition ||
+        return Boolean(window.SpeechRecognition ||
           window.webkitSpeechRecognition ||
           window.mozSpeechRecognition ||
           window.msSpeechRecognition ||
-          window.oSpeechRecognition;
+          window.oSpeechRecognition);
       },
 
+      /**
+       * Does real update of component output property.
+       * Trimming the raw value.
+       *
+       * @private
+       */
       _doUpdate: function() {
         this.set('query', this.raw.trim());
       },
 
+      /**
+       * Conditionally returns true if component
+       * have any value atm
+       *
+       * @param {String} raw
+       * @returns {boolean}
+       * @private
+       */
       _hasValue: function(raw) {
         return Boolean(raw && raw.length);
+      },
+
+      /**
+       * Handles recognition error event showing the toast
+       * and resetting the icon.
+       */
+      recognitionFailed: function() {
+        this.showToast('Recognition failed');
+        this.recognitionState = 'ready';
       }
-    });
+    })
+
   </script>
 </dom-module>

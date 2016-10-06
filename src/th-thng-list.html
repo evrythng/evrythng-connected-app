@@ -10,10 +10,14 @@
 
 <link rel="import" href="shared-styles.html">
 
+<!--
+  Infinite scrolled list of thngs loaded by given search query.
+  Allows to select thng, passing the even to upper level.
+-->
 <dom-module id="th-thng-list">
   <style include="shared-styles">
     :host {
-      display: block;
+      @apply(--layout-block);
     }
 
     paper-item {
@@ -32,8 +36,6 @@
     paper-item > iron-image {
       margin-right: var(--app-unit-sm);
     }
-
-
   </style>
   <template>
 
@@ -67,25 +69,44 @@
 
       properties: {
 
+        /**
+         * Search query to be applied to the iterator
+         * read configuration
+         */
         query: {
           type: String,
           observer: 'refresh'
         },
 
+        /**
+         * Stores currently selected thng
+         */
         selectedItem: {
           type: Object,
           notify: true
         },
 
+        /**
+         * Stores EVT.User to behave on behalf of.
+         */
         user: {
           type: Object,
           observer: 'refresh'
         },
 
+        /**
+         * Stores the array of loaded thngs from the API
+         */
         thngs: {
           type: Array,
           value: []
-        }
+        },
+
+        /**
+         * Indicates that list is currently fetching next
+         * portion of items from the API
+         */
+        loadingMore: Boolean
       },
 
       behaviors: [
@@ -104,14 +125,24 @@
         'refresh(filter.*)'
       ],
 
+      /**
+       * When ready, retrieves the scroll target from the
+       * behavior and passes it to the scroller, so it able to
+       * determine when the lower bound is close.
+       */
       ready: function() {
         this.$.scroller.scrollTarget = this.getScrollTarget()
       },
 
+      /**
+       * Refreshes the element based on current state.
+       */
       refresh: function () {
         var scope = this;
 
         if (!scope.loading && scope.user) {
+          // Hide already shown items from the view
+          // so user don't stuck with outdated data
           scope.set('thngs', []);
 
           this.initIterator();
@@ -119,19 +150,32 @@
         }
       },
 
+      /**
+       * Inits evrythng.js iterator on thng resource
+       * to seamlessly fetch next portion of items when needed
+       */
       initIterator: function() {
         var scope = this;
         var opts = {};
 
         if (scope.query) {
+          // TIP: evrythng API supports many different
+          // ways to narrow results of request
+          // @see https://developers.evrythng.com/docs/filters
           opts.params = {
             filter: 'name=' + scope.query + '*'
           };
         }
 
+        // TIP: To get more information on iterators in evrythng.js
+        // @see https://github.com/evrythng/evrythng.js#iterator-api
         this.iterator = this.user.thng().iterator(opts);
       },
 
+      /**
+       * Fetches next portion of thngs into view
+       * "next" may be the first one as well.
+       */
       loadMoreThngs: function() {
         var scope = this;
 
@@ -147,6 +191,12 @@
           });
       },
 
+      /**
+       * Loads references for a given chunk of thngs
+       *
+       * @param {Object[]} chunk Array of thngs to fill references for
+       * @returns {Promise|Array}
+       */
       loadChunkReferences: function(chunk) {
         var scope = this;
 
@@ -154,14 +204,20 @@
           return Promise.all(
             chunk.value.map(function(thng) {
               if (thng.product) {
+                // Using caching service we don't need
+                // to worry about batching of requests for
+                // the same products.
                 return scope._readProduct(thng.product)
                   .then(function(product) {
-                    thng.product = product;
+                    // Assign received data straight to the thng.
+                    thng.product = product; // Will overwrite product id
                     thng.photo = scope._getProductPhoto(product);
                   })
                   // Lazily handle missing product
                   .catch(function() {});
               } else {
+                // Otherwise, nothing to do,
+                // just let it flow.
                 return Promise.resolve();
               }
             })
@@ -173,20 +229,38 @@
         }
       },
 
+      /**
+       * Loads given chunk of thngs to the view.
+       *
+       * @param {Object[]} thngs
+       */
       loadToView: function(thngs) {
         var scope = this;
 
+        // Notify each thng
         thngs.forEach(function(thng) {
           scope.push('thngs', thng);
         });
 
+        // Reset lower bound trigger so
+        // we can load more later.
         scope.$.scroller.clearLower();
+        // Update metric property
         scope.set('hasThngs', scope.thngs.length > 0);
         scope.async(function() {
+          // Wait till the list rendered the actual
+          // items and tell it needs to verify size.
           scope.$.list.fire('iron-resize');
         });
       },
 
+      /**
+       * Handles selection of a thng, dispatchin an
+       * event for parent element.
+       *
+       * @param {CustomEvent} e
+       * @private
+       */
       _selectionChanged: function(e) {
         if (e.detail.value) {
           this.fire('item-selected', e.detail.value);
@@ -194,8 +268,16 @@
         }
       },
 
+      /**
+       * Helper method, returns true if given array of thngs
+       * have any items.
+       *
+       * @param {Object[]} thngs
+       * @returns {Boolean}
+       * @private
+       */
       _hasAnyThngs: function(thngs) {
-        return thngs && thngs.length > 0;
+        return Boolean(thngs && thngs.length > 0);
       }
     });
   </script>

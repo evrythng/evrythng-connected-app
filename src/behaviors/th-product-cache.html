@@ -18,14 +18,12 @@
        */
       _readProduct: function(id) {
         if (_productCache[id]) {
-          // Found in cache, resolve
-          return Promise.resolve(_productCache[id]);
+          // Found in cache, return cached
+          // promise, which may be resolved many times on demand
+          return _productCache[id];
         } else {
-          // Do a request to API
-          return this.user.product(id).read()
-            .then(function(product) {
-              return _productCache[id] = product;
-            });
+          // Do a request to API, caching the request promise
+          return (_productCache[id] = this.user.product(id).read());
         }
       }
     };

@@ -3,6 +3,10 @@
 
 <link rel="import" href="shared-styles.html">
 
+<!--
+  Allows to modify action object internal fields and then
+  post it on given entity.
+-->
 <dom-module id="th-post-action-modal">
   <template>
     <style include="shared-styles">
@@ -52,8 +56,19 @@
       is: 'th-post-action-modal',
 
       properties: {
+        /**
+         * Exemplar of action type to post an action of
+         */
         type: Object,
+
+        /**
+         * Entity to be the target to post action on
+         */
         entity: Object,
+
+        /**
+         * Action Document to be send to EVRYTHNG API
+         */
         action: {
           type: Object
         }

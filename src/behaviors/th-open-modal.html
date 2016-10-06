@@ -13,16 +13,17 @@
       var key;
       var el = document.createElement(name);
 
+      // Paper-dialog and iron-overlay in particular
+      // plays bad with app-drawer-layout, being overlapped by drawer
+      // if located inside of it.
       Polymer.dom(document.body.firstElementChild.root).appendChild(el);
 
+      // Transfer the data to the element
       for (key in data) {
         el.set(key, data[key]);
       }
 
-      el.open = function() {
-        el.$.dialog.open();
-      };
-
+      // Preassign utility methods
       el.close = function() {
         el.$.dialog.close();
       };
@@ -31,10 +32,12 @@
         el.remove();
       };
 
+      // Cleanup after dialog gone
       el.$.dialog.addEventListener('iron-overlay-canceled', el._onIronOverlayCanceled);
       el.$.dialog.addEventListener('iron-overlay-closed', el._onIronOverlayCanceled);
 
-      el.open();
+      // Show the dialog
+      el.$.dialog.open();
     }
   }
 </script>

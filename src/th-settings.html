@@ -97,10 +97,17 @@
       is: 'th-settings',
 
       properties: {
+        /**
+         * Holds the live settings slice
+         */
         settings: {
           type: Object
         },
 
+        /**
+         * Holds the settings copy to make editing without
+         * modifying original preferences.
+         */
         raw: {
           type: Object,
           value: {}

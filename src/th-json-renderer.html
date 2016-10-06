@@ -1,5 +1,7 @@
 <script src="../bower_components/renderjson/renderjson.js"></script>
 <script>
+  // Preconfiguring the renderjson for
+  // any usage in future.
   renderjson.set_icons('+', '-');
 </script>
 
@@ -27,6 +29,7 @@
         top: 1px;
       }
 
+      /* exposing the stlying as variables */
       .renderjson .syntax {
         color: var(--json-theme-syntax);
       }
@@ -73,6 +76,9 @@
         }
       },
 
+      /**
+       * Re-renders the json on its change.
+       */
       jsonChanged: function() {
         if (this.$.container.firstChild) {
           this.$.container.removeChild(this.$.container.firstChild);

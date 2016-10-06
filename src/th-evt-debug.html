@@ -9,6 +9,7 @@
   EVT Trace Console
 
   Logs requests and responses made and received by evrythng.js
+  using the EVT's interceptors feature.
 -->
 <dom-module id="th-evt-debug">
   <template>
@@ -22,6 +23,7 @@
         /* +10% to hide the shadow */
         transform: translateY(110%);
 
+        /* json-renderer theme */
         --json-theme-link: var(--paper-grey-400);
         --json-theme-disclosure: var(--paper-grey-400);
         --json-theme-syntax: var(--paper-grey-600);
@@ -119,11 +121,9 @@
         }
       },
 
+      // TODO: Remove when fix released
       ready: function() {
-        if (window.EVT) {
-          this.EVT = window.EVT;
-          this.patchEVT();
-        }
+        this.patchEVT();
       },
 
       // TODO: Remove when fix released
@@ -143,6 +143,11 @@
         };
       },
 
+      /**
+       * Logs a EVRYTHNG API request.
+       *
+       * @param {Object} opts
+       */
       logRequest: function(opts) {
         this.inc('total', +1);
         this.log({
@@ -151,43 +156,79 @@
         });
       },
 
-      logResponse: function(opts) {
+      /**
+       * Logs EVRYTHNG response.
+       *
+       * @param {Object} res
+       * @returns {*}
+       */
+      logResponse: function(res) {
         this.log({
           type: 'RESPONSE',
-          payload: opts
+          payload: res
         });
 
-        return opts;
+        return res;
       },
 
+      /**
+       * (De)Increments a property by its name.
+       *
+       * @param {String} vr name of property
+       * @param {Number} inc increment to add to prop
+       */
       inc: function(vr, inc) {
         this.set(vr, this[vr] + inc);
       },
 
+      /**
+       * Pushes given log item to the array of logs
+       *
+       * @param {Object} obj
+       */
       log: function(obj) {
         this.push('events', obj);
         this.ensureFull();
 
+        // When dom-repeat rerendered,
+        // scrolls to the very bottom of log
         this.async(function() {
           this.$.scroller.scrollTop = this.$.scroller.scrollHeight;
         });
       },
 
+      /**
+       * Ensures that we're not rendering too much,
+       * maintaining capacity of events buffer.
+       */
       ensureFull: function() {
         if (this.events.length > 100) {
           this.splice('events', this.events.length - 1, 1);
         }
       },
 
+      /**
+       * Cleans events buffer
+       */
       clean: function() {
         this.splice('events', 0, this.events.length);
         this.set('total', 0);
       },
 
+      /**
+       * Closes the debug overlay
+       */
       close: function() {
         this.set('opened', false);
       },
 
+      /**
+       * Triggered on inside or outside overlay state change,
+       * updating the view assets accordingly.
+       *
+       * @param {Boolean} opened
+       * @private
+       */
       _onOpenedChanged: function(opened) {
         this.classList.toggle('opened', opened);
         this.fire('state-changed', opened);

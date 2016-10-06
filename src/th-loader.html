@@ -1,5 +1,11 @@
 <link rel="import" href="loader-styles.html">
 
+<!--
+  Simple yet attractive dynamic loader in pure html/css.
+  Implements set of icons transforming to each other with seamless transitions.
+
+  Original code at: http://codepen.io/iamfrontender/pen/MKPGjR
+-->
 <dom-module id="th-loader">
   <template>
     <style include="loader-styles"></style>
@@ -20,38 +26,51 @@
     Polymer({
       is: 'th-loader',
 
+      /**
+       * Stores all available loader states (icons).
+       */
       classes: [
         'pin', 'wi-fi', 't-shirt', 'fridge', 'heart', 'bulb', 'gym'
       ],
 
       properties: {
+        /**
+         * Defines the size of a loader, should
+         * be any valid css string unit.
+         */
         size: {
           type: String,
           observer: '_onSizeChanged'
         }
       },
 
+      /**
+       * Starts infinite looping through all the available loader states
+       */
       ready: function() {
         var cls = 0;
         var scope = this;
-        var loader = this.getLoader();
+        var loader = this.$.loader;
 
         setInterval(function() {
+          // Select next or first class from the list
           loader.classList.remove(scope.classes[cls]);
           cls = cls + 1 > scope.classes.length ? 0 : cls + 1;
           loader.classList.add(scope.classes[cls]);
         }, 1000);
       },
 
-      getLoader: function() {
-        return this.$.loader;
-      },
-
+      /**
+       * Sets the given size attribute value as loader size
+       *
+       * @param {String} size Any valid css unit size notation (20px, 1vh, ...)
+       * @private
+       */
       _onSizeChanged: function(size) {
-        var loader = this.getLoader();
-
-        loader.style.width = size;
-        loader.style.height = size;
+        this.mixin(this.$.loader.style, {
+          width: size,
+          height: size
+        });
       }
     });
   </script>
