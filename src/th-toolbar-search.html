@@ -70,8 +70,6 @@
       </span>
 
     </paper-material>
-
-    <voice-recognition id="voiceRecognition"></voice-recognition>
   </template>
   <script>
     Polymer({
@@ -103,14 +101,16 @@
         }
       },
 
-      listeners: {
-        'voiceRecognition.result': 'setRaw',
-        'voiceRecognition.error': 'recognitionFailed'
-      },
-
       behaviors: [
         TH.behaviors.showToast
       ],
+
+      /**
+       * Initialises voice recognition if possible
+       */
+      create: function() {
+        this.initVoiceRecognition();
+      },
 
       /**
        * Imperatively assigns necessary listeners,
@@ -234,6 +234,27 @@
       recognitionFailed: function() {
         this.showToast('Recognition failed');
         this.recognitionState = 'ready';
+      },
+
+      /**
+       * Imperatively initialises the voice recognition
+       * Allows to skip large unneeded chunk of work
+       * if recognition is not available.
+       */
+      initVoiceRecognition: function() {
+        var el;
+
+        if (this.isRecognitionAvailable()) {
+          el = document.createElement('voice-recognition');
+
+          el.addEventListener('error', this.recognitionFailed.bind(this));
+          el.addEventListener('result', this.setRaw);
+
+          Polymer.dom(this.root).appendChild(el);
+          this.$.voiceRecognition = el;
+        } else {
+          this.$.voiceRecognition = {};
+        }
       }
     })
 
