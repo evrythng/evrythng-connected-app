@@ -10,6 +10,7 @@
 <link rel="import" href="th-chip.html">
 <link rel="import" href="th-object-view.html">
 <link rel="import" href="th-edit-property-modal.html">
+<link rel="import" href="th-post-action-modal.html">
 <link rel="import" href="shared-styles.html">
 
 <dom-module id="th-thng-details">
@@ -79,6 +80,7 @@
         @apply(--app-layout-flex-25);
         @apply(--layout-vertical);
 
+        background-color: var(--paper-grey-50);
         box-sizing: border-box;
         margin: var(--app-unit-sm);
         padding: var(--app-unit-sm);
@@ -95,7 +97,7 @@
       }
 
       .property.boolean {
-        background-color: var(--app-boolean-property-color);
+        border-left: 5px solid var(--app-boolean-property-color);
         color: var(--app-boolean-text-color);
       }
 
@@ -105,31 +107,25 @@
 
       .property.boolean .circle {
         font-weight: lighter;
-        font-size: calc(var(--app-unit-lg) - var(--app-unit-sm));
-        color: var(--app-boolean-text-color);
-      }
-
-      .property.boolean .circle.true {
-        background-color: var(--paper-green-500);
-      }
-
-      .property.boolean .circle.false {
-        background-color: var(--paper-red-500);
+        font-size: var(--app-unit-md);
+        color: var(--paper-grey-50);
+        background-color: var(--paper-grey-500);
+        font-weight: bolder;
       }
 
       .property.string {
-        background-color: var(--app-string-property-color);
+        border-left: 5px solid var(--app-string-property-color);
         color: var(--app-string-text-color);
       }
 
       .property.number {
-        background-color: var(--app-number-property-color);
+        border-left: 5px solid var(--app-number-property-color);
         color: var(--app-number-text-color);
       }
 
       .property.number > container,
       .property.string > container {
-        font-size: var(--app-unit-lg);
+        font-size: var(--app-unit-md);
         font-weight: lighter;
       }
 
@@ -224,7 +220,7 @@
 
       <container>
         <template is="dom-repeat" items="{{actionTypes}}">
-          <paper-item class="action-type" on-tap="createAction">
+          <paper-item class="action-type" on-tap="openAction">
             <span>{{_getActionTypeDisplayName(item)}}</span>
             <span class="flex"></span>
             <iron-icon icon="send"></iron-icon>
@@ -271,6 +267,7 @@
 
       behaviors: [
         TH.behaviors.showToast,
+        TH.behaviors.openModal,
         TH.behaviors.loader,
         TH.behaviors.thng,
         TH.behaviors.product,
@@ -371,7 +368,7 @@
       },
 
       isBigValue: function(val) {
-        if (String(val).length > 32) {
+        if (String(val).length > 64) {
           return 'big';
         } else {
           return 'small';
@@ -406,14 +403,18 @@
       },
 
       openProperty: function(e) {
-        var item = e.model.item;
-        var modal = document.createElement('th-edit-property-modal');
+        this.openModal('th-edit-property-modal', {
+          property: e.model.item
+        });
+      },
 
-        Polymer.dom(document.body).appendChild(modal);
-
-        modal.set('property', item);
-        modal.open();
+      openAction: function(e) {
+        this.openModal('th-post-action-modal', {
+          type: e.model.item,
+          entity: this.thng
+        });
       }
+
     });
   </script>
 </dom-module>

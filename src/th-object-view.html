@@ -1,6 +1,8 @@
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+
 <dom-module id="th-object-view">
   <template>
-    <style>
+    <style include="iron-flex">
       :host {
         display: block;
       }
@@ -13,14 +15,40 @@
       section {
         margin-bottom: var(--app-unit-xs);
       }
+
+      .editor {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+      }
+
+      .editor paper-input {
+        @apply(--layout-flex);
+      }
+
+      .separator {
+        margin: 0 var(--app-unit-sm);
+      }
     </style>
 
     <template is="dom-repeat" items="{{props}}">
-      <section>
+      <section hidden$="{{editing}}">
         <h5>{{item.name}}</h5>
         <span>{{item.value}}</span>
       </section>
     </template>
+
+    <container hidden$="{{!editing}}">
+      <template is="dom-repeat" items="{{props}}">
+        <section class="editor" >
+          <paper-input no-label-float label="key" value="{{item.name}}"></paper-input>
+          <span class="separator">:</span>
+          <paper-input no-label-float label="value" value="{{item.value}}"></paper-input>
+          <paper-icon-button icon="close" on-tap="removeField"></paper-icon-button>
+        </section>
+      </template>
+      <paper-fab mini icon="add" title="Add Field" on-tap="addField"></paper-fab>
+    </container>
+
   </template>
   <script>
     Polymer({
@@ -31,10 +59,47 @@
       ],
 
       properties: {
-        object: Object,
+        object: {
+          type: Object,
+          notify: true
+        },
+
         props: {
           type: Array,
           computed: '_toArray(object)'
+        },
+
+        editing: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      observers: [
+        'updateObject(props.*)'
+      ],
+
+      addField: function() {
+        if (!this.props) {
+          this.set('props', []);
+        }
+
+        this.push('props', {
+          name: '',
+          value: ''
+        });
+      },
+
+      removeField: function(e) {
+        var field = e.model.item;
+        var index = this.props.indexOf(field);
+
+        this.splice('props', index, 1);
+      },
+
+      updateObject: function(update) {
+        if (update.path !== 'props') {
+          this.object = this._toObject(this.props);
         }
       },
 
@@ -48,7 +113,62 @@
        */
       _toArray: function(object) {
         return this._abstractListProperty(object)
+      },
+
+      /**
+       * Converts given properties array to object
+       * with { name: {String}, value: {*}} fields.
+       *
+       * @param {Object[]} props
+       * @returns {Object}
+       * @private
+       */
+      _toObject: function(props) {
+        var output = {};
+
+        props.forEach(function(prop) {
+          output[prop.name] = this._toRealValue(prop.value);
+        }, this);
+
+        return output;
+      },
+
+      /**
+       * Tries to convert given string to a primitive type
+       *
+       * @param {String} str
+       * @returns {*}
+       * @private
+       */
+      _toRealValue: function(str){
+        if(str === 'null' || str === null){
+          return null;
+        }
+
+        if(str === 'undefined' || str === undefined){
+          return undefined;
+        }
+
+        if(str === 'false' || str === false){
+          return false;
+        }
+
+        if(str === 'true' || str === true){
+          return true;
+        }
+
+        var test = (str.trim && str.trim()) || str;
+        if(test.length === 0 || isNaN(test)){
+          return str;
+        }
+
+        if(!isNaN(str)){
+          return parseFloat(str);
+        }
+
+        return str;
       }
-    })
+
+    });
   </script>
 </dom-module>

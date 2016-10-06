@@ -2,6 +2,7 @@
 <link rel="import" href="../bower_components/iron-list/iron-list.html">
 <link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
 <link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
@@ -12,6 +13,7 @@
 
 <link rel="import" href="th-chip.html">
 <link rel="import" href="th-object-view.html">
+<link rel="import" href="th-post-action-modal.html">
 <link rel="import" href="shared-styles.html">
 
 <!--
@@ -72,6 +74,37 @@
       .thngs > paper-item {
         @apply(--layout-horizontal);
       }
+
+      .add-thng {
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+
+        padding: 0 var(--app-unit-md);
+      }
+
+      .add-thng paper-fab {
+        margin-top: var(--app-unit-md);
+        transition: transform .3s ease;
+      }
+
+      paper-autocomplete {
+        @apply(--layout-flex);
+
+        pointer-events: none;
+        transition: transform .3s ease;
+        transform-origin: right;
+        transform: scale(0, 1);
+        z-index: 2;
+      }
+
+      paper-autocomplete.visible {
+        pointer-events: all;
+        transform: scale(1);
+      }
+
+      paper-fab.rotated {
+        transform: rotate(45deg);
+      }
     </style>
 
     <iron-media-query query="(max-width: 600px)" query-matches="{{mobile}}"></iron-media-query>
@@ -110,7 +143,7 @@
 
       <container>
         <template is="dom-repeat" items="{{actionTypes}}">
-          <paper-item class="action-type" on-tap="createAction">
+          <paper-item class="action-type" on-tap="openAction">
             <span>{{_getActionTypeDisplayName(item)}}</span>
             <span class="flex"></span>
             <iron-icon icon="send"></iron-icon>
@@ -123,8 +156,14 @@
     <section class="thngs">
       <h4>Thngs</h4>
 
-      <paper-autocomplete id="thngsSearch" label="Add thng" remote-source="true"
-                          on-autocomplete-change="debounceAutocomplete" on-autocomplete-selected="onThngSelected"></paper-autocomplete>
+      <section class="add-thng">
+        <paper-autocomplete id="thngsSearch" label="Type in name..." remote-source="true"
+                            on-autocomplete-change="debounceAutocomplete"
+                            on-autocomplete-selected="onThngSelected"></paper-autocomplete>
+
+        <paper-fab mini id="toggleAddThng" icon="add" title="Add Thng" on-tap="toggleAddThng"></paper-fab>
+
+      </section>
 
       <container>
         <iron-list id="collectionThngs" hidden$="{{!_hasAnyThngs(collection, collection.thngs)}}" items="{{collection.thngs}}">
@@ -174,6 +213,7 @@
 
       behaviors: [
         TH.behaviors.showToast,
+        TH.behaviors.openModal,
         TH.behaviors.loader,
         TH.behaviors.collection,
         TH.behaviors.actionType
@@ -403,6 +443,7 @@
         e.stopPropagation();
         e.preventDefault();
 
+        scope.set('loading', true);
         scope.removeThngFromCollection(thng.id)
           .then(function () {
             var index = scope.collection.thngs.indexOf(thng);
@@ -467,6 +508,25 @@
        */
       getThngUrl: function(thng) {
         return '/thngs/' + thng.id;
+      },
+
+      /**
+       * Toggles "add thng" paper-autocomplete.
+       */
+      toggleAddThng: function() {
+        this.$.thngsSearch.classList.toggle('visible');
+        this.$.toggleAddThng.classList.toggle('rotated');
+      },
+
+      /**
+       * Opens create action modal with required configuration
+       * @param {CustomEvent} e
+       */
+      openAction: function(e) {
+        this.openModal('th-post-action-modal', {
+          type: e.model.item,
+          entity: this.collection
+        });
       }
 
     });

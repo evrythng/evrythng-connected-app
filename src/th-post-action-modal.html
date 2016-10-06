@@ -1,0 +1,115 @@
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="th-post-action-modal">
+  <template>
+    <style include="shared-styles">
+      paper-dialog {
+        width: 90vw;
+        max-width: calc(var(--app-unit-xl) * 12);
+      }
+
+      container {
+        display: block;
+      }
+
+      juicy-jsoneditor {
+        height: 18em;
+      }
+
+      h4 {
+        margin-bottom: 0;
+      }
+
+      .buttons {
+        @apply(--layout-horizontal);
+      }
+    </style>
+
+    <iron-media-query query="(max-width: 600px)" query-matches="{{mobile}}"></iron-media-query>
+    <iron-localstorage name="{{getActionTemplateName(type)}}" value="{{action}}"
+      on-iron-localstorage-load-empty="setDefaultTemplate"></iron-localstorage>
+
+    <paper-dialog with-backdrop id="dialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+      <h2>Create {{_getActionTypeDisplayName(type)}}</h2>
+
+      <container id="container">
+        <h4>Custom Fields</h4>
+
+        <th-object-view object="{{action.customFields}}" editing></th-object-view>
+      </container>
+
+      <div class="buttons">
+        <paper-button dialog-dismiss>Cancel</paper-button>
+        <paper-button on-tap="create">Create</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+  <script>
+    Polymer({
+      is: 'th-post-action-modal',
+
+      properties: {
+        type: Object,
+        entity: Object,
+        action: {
+          type: Object
+        }
+      },
+
+      behaviors: [
+        TH.behaviors.showToast,
+        TH.behaviors.actionType
+      ],
+
+      observers: [
+        'resize(action.customFields.*)'
+      ],
+
+      /**
+       * Creates action with current modal state.
+       */
+      create: function() {
+        var scope = this;
+
+        scope.entity.action(scope.type.name).create(scope.action)
+          .then(function() {
+            scope.showToast('Action ' + scope.type.name + ' created');
+            scope.close();
+          })
+          .catch(function() {
+            scope.showToast('Failed to create' + scope.type.name + ' action');
+          });
+      },
+
+      /**
+       * Notifies the dialog about changes requiring size
+       * recalculation
+       */
+      resize: function() {
+        this.$.dialog.notifyResize();
+      },
+
+      /**
+       * Returns name of action template for localstorage
+       *
+       * @param {Object} type ActionType DTO
+       * @returns {String}
+       */
+      getActionTemplateName: function(type) {
+        return 'th-action-' + type.name + '-template';
+      },
+
+      /**
+       * Sets the default template of action.
+       */
+      setDefaultTemplate: function() {
+        this.action = {
+          customFields: {}
+        };
+      }
+    });
+  </script>
+</dom-module>

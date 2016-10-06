@@ -17,9 +17,11 @@
     }
 
     paper-item {
-      @apply(--layout-horizontal);
+      @apply(--app-list-item);
+    }
 
-      padding: var(--app-unit-xs);
+    paper-item:first-of-type {
+      border-top: none;
     }
 
     paper-item > div {
@@ -186,7 +188,10 @@
       },
 
       _selectionChanged: function(e) {
-        this.fire('item-selected', e.detail.value);
+        if (e.detail.value) {
+          this.fire('item-selected', e.detail.value);
+          this.$.list.deselectItem(e.detail.value);
+        }
       },
 
       _hasAnyThngs: function(thngs) {

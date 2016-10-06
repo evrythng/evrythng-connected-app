@@ -6,6 +6,7 @@
   <template>
     <style >
       :root {
+        --app-evt-red: #da291c;
         --app-unit-base: 8px;
 
         --app-unit-xs: calc(var(--app-unit-base) * 0.5);
@@ -14,7 +15,7 @@
         --app-unit-lg: calc(var(--app-unit-base) * 4);
         --app-unit-xl: calc(var(--app-unit-base) * 8);
 
-        --app-max-page-width: 700px;
+        --app-max-page-width: calc(var(--app-unit-xl) * 12);
 
         --app-header-color: var(--paper-grey-50);
         --app-drawer-color: var(--paper-grey-800);
@@ -23,15 +24,22 @@
         --app-image-placeholder-background: var(--paper-grey-200);
         --app-details-background: var(--paper-grey-200);
         --app-chip-color: var(--paper-grey-200);
+        --app-property-text-color: var(--paper-grey-700);
 
         --app-boolean-property-color: var(--paper-blue-grey-500);
-        --app-boolean-text-color: var(--paper-grey-50);
+        --app-boolean-text-color: var(--app-property-text-color);
 
         --app-string-property-color: var(--paper-amber-500);
-        --app-string-text-color: var(--paper-grey-50);
+        --app-string-text-color: var(--app-property-text-color);
 
         --app-number-property-color: var(--paper-cyan-500);
-        --app-number-text-color: var(--paper-grey-50);
+        --app-number-text-color: var(--app-property-text-color);
+
+        --paper-toggle-button-checked-bar-color:  var(--paper-grey-900);
+        --paper-toggle-button-checked-button-color:  var(--paper-grey-50);
+        --paper-toggle-button-checked-ink-color: var(--paper-grey-50);
+
+        --paper-fab-background: var(--app-evt-red);
 
         --app-circle: {
           border-radius: 50%;
@@ -41,6 +49,17 @@
           font-family: monospace;
         };
 
+        --app-page: {
+          max-width: var(--app-max-page-width);
+          margin: var(--app-unit-md) auto;
+        };
+
+        --app-list-item: {
+          @apply(--layout-horizontal);
+
+          padding: var(--app-unit-xs);
+          border-top: 1px solid var(--paper-grey-100);
+        };
 
         --app-layout-flex-25: {
           @apply(--layout-flex);
@@ -170,6 +189,11 @@
         text-align: center;
       }
 
+      .list-footer {
+        text-align: center;
+        font-size: var(--app-unit-sm);
+      }
+
       .circle {
         @apply(--app-circle);
 
@@ -268,7 +292,7 @@
       }
 
       .target-environment > span {
-        @apply(--layout-flex);
+        margin-right: var(--app-unit-sm);
       }
 
       .target-environment > iron-icon {
@@ -278,6 +302,10 @@
       .paper-item-link {
         color: inherit;
         text-decoration: none;
+      }
+
+      .muted {
+        color: var(--paper-grey-700);
       }
 
     </style>

@@ -20,11 +20,16 @@
     }
 
     paper-item {
+      @apply(--app-list-item);
       @apply(--layout-vertical);
       @apply(--layout-start);
 
       height: var(--app-unit-xl);
       padding: var(--app-unit-xs);
+    }
+
+    paper-item:first-of-type {
+      border-top: none;
     }
 
     .empty-message {
@@ -134,7 +139,10 @@
        * @private
        */
       _selectionChanged: function(e) {
-        this.fire('item-selected', e.detail.value);
+        if (e.detail.value) {
+          this.fire('item-selected', e.detail.value);
+          this.$.list.deselectItem(e.detail.value);
+        }
       },
 
       /**

@@ -105,7 +105,7 @@
         </template>
       </paper-dialog-scrollable>
       <div class="buttons layout horizontal">
-        <paper-button dialog-dismiss >Cancel</paper-button>
+        <paper-button dialog-dismiss>Cancel</paper-button>
         <paper-button on-tap="update">Update</paper-button>
       </div>
     </paper-dialog>
@@ -139,21 +139,6 @@
       _loaderContainer: 'paper-dialog',
 
       /**
-       * Opens the modal, redirecting call to the modal method.
-       */
-      open: function() {
-        this.$.dialog.open();
-      },
-
-      /**
-       * Closing the modal and cleans up the DOM
-       */
-      close: function() {
-        this.$.dialog.close();
-        this.$.dialog.parentNode.removeChild(this.$.dialog);
-      },
-
-      /**
        * Ensures have correct height after tthe property update.
        */
       valueChanged: function() {
@@ -172,14 +157,20 @@
       },
 
       /**
-       * Convert
-       * @param timestamp
+       * Converts the given timestamp
+       * to local time string.
+       *
+       * @param {Number} timestamp
        * @returns {string}
        */
       toLocalTime: function(timestamp) {
         return new Date(timestamp).toLocaleString();
       },
 
+      /**
+       * Returns string with date of last update.
+       * Last update is always first in history.
+       */
       getLastUpdate: function(prop) {
         return this.toLocalTime(prop.history[0].timestamp);
       },

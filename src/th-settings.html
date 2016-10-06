@@ -1,4 +1,6 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
 <link rel="import" href="../bower_components/paper-styles/paper-styles-classes.html">
 <link rel="import" href="../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../bower_components/paper-input/paper-textarea.html">
@@ -7,15 +9,25 @@
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="./th-thng-details.html">
 
+<!--
+  Settings page, allows to modify application settings.
+  Features confirmation layer between editing and actual settings update.
+-->
 <dom-module id="th-settings">
   <template>
     <style include="shared-styles">
       :host {
-        display: block;
+        @apply(--app-page);
+        @apply(--layout-block);
       }
 
       section {
-        margin-bottom: 32px;
+        margin-bottom: var(--app-unit-lg);
+      }
+
+      .actions {
+        text-align: right;
+        margin-bottom: 0;
       }
     </style>
 
@@ -27,7 +39,7 @@
           <paper-textarea id="apiKey"
                           label="Application API Key"
                           required auto-validate
-                          value="{{settings.apiKey}}"
+                          value="{{raw.apiKey}}"
                           placeholder="Application API Key"
           ></paper-textarea>
         </section>
@@ -40,7 +52,7 @@
                        required auto-validate
                        error-message="Please type a URL."
                        type="url"
-                       value="{{settings.apiUrl}}"
+                       value="{{raw.apiUrl}}"
                        placeholder="E.g. https://api.evrythng.com"
           ></paper-input>
 
@@ -49,7 +61,7 @@
                        required auto-validate
                        error-message="Please type a URL."
                        type="url"
-                       value="{{settings.localhostApiUrl}}"
+                       value="{{raw.localhostApiUrl}}"
                        placeholder="E.g. http://192.168.1.7:8080"
           ></paper-input>
 
@@ -58,7 +70,7 @@
                        required auto-validate
                        error-message="Please type a URL."
                        type="url"
-                       value="{{settings.wsApiUrl}}"
+                       value="{{raw.wsApiUrl}}"
                        placeholder="E.g. wss://192.168.0.13:443/mqtt"
           ></paper-input>
 
@@ -67,12 +79,14 @@
                        required auto-validate
                        error-message="Please type a URL."
                        type="url"
-                       value="{{settings.wsLocalhostApiUrl}}"
+                       value="{{raw.wsLocalhostApiUrl}}"
                        placeholder="E.g. wss://192.168.0.13:443/mqtt"
           ></paper-input>
         </section>
 
-        <p>Settings are automatically saved on any edit.</p>
+        <section class="actions">
+          <paper-icon-button icon="check" on-tap="dispatchUpdate"></paper-icon-button>
+        </section>
       </form>
     </paper-material>
 
@@ -80,7 +94,41 @@
 
   <script>
     Polymer({
-      is: 'th-settings'
+      is: 'th-settings',
+
+      properties: {
+        settings: {
+          type: Object
+        },
+
+        raw: {
+          type: Object,
+          value: {}
+        }
+      },
+
+      behaviors: [
+        TH.behaviors.showToast
+      ],
+
+      observers: [
+        'onSettingsChanged(settings.*)'
+      ],
+
+      /**
+       * Dispatches the settings to current raw editable object.
+       */
+      onSettingsChanged: function() {
+        this.raw = this.mixin({}, this.settings);
+      },
+
+      /**
+       * Triggers the actual update of application settings
+       */
+      dispatchUpdate: function() {
+        this.mixin(this.settings, this.raw);
+        this.showToast('Application settings updated');
+      }
     });
   </script>
 </dom-module>

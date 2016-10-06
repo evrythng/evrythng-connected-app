@@ -1,0 +1,40 @@
+<script>
+  /**
+   * Adds open modal method to handle app-layout limitation gracefully.
+   */
+  TH.behaviors.openModal = {
+    /**
+     * Opens given modal on top with or without overlay.
+     *
+     * @param {String} name Name of modal element to open
+     * @param {Object} data Properties to set on modal
+     */
+    openModal: function(name, data) {
+      var key;
+      var el = document.createElement(name);
+
+      Polymer.dom(document.body.firstElementChild.root).appendChild(el);
+
+      for (key in data) {
+        el.set(key, data[key]);
+      }
+
+      el.open = function() {
+        el.$.dialog.open();
+      };
+
+      el.close = function() {
+        el.$.dialog.close();
+      };
+
+      el._onIronOverlayCanceled = function() {
+        el.remove();
+      };
+
+      el.$.dialog.addEventListener('iron-overlay-canceled', el._onIronOverlayCanceled);
+      el.$.dialog.addEventListener('iron-overlay-closed', el._onIronOverlayCanceled);
+
+      el.open();
+    }
+  }
+</script>

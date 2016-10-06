@@ -18,6 +18,7 @@
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 
 <script src="../bower_components/lodash/lodash.js"></script>
 <script src="../bower_components/evrythng/dist/evrythng.js"></script>
@@ -88,8 +89,9 @@
           <section>
             <span class="drawer-item target-environment" on-tap="_toggleTargetEnvironment">
               <iron-icon id="targetEnvironmentIcon"></iron-icon>
-              <span>Cloud</span>
-              <paper-toggle-button checked="{{settings.remote}}"></paper-toggle-button>
+              <span id="targetEnvironmentCloud">Remote</span>
+              <paper-toggle-button checked="{{settings.local}}"></paper-toggle-button>
+              <span id="targetEnvironmentLocal">THNGHUB</span>
             </span>
           </section>
 
@@ -149,7 +151,6 @@
          */
         page: {
           type: String,
-          reflectToAttribute: true,
           observer: '_onPageChanged'
         },
 
@@ -187,7 +188,7 @@
       observers: [
         'setupEVT(settings.*)',
         '_routePageChanged(routeData.page)',
-        '_onTargetEnvironmentChange(settings.remote)'
+        '_onTargetEnvironmentChange(settings.local)'
       ],
 
       behaviors: [
@@ -240,7 +241,7 @@
         /**
          * Make local requests by default (only to THNGHUB endpoint)
          */
-        remote: true
+        local: true
       },
 
       /**
@@ -301,7 +302,7 @@
             httpApiUrl: settings.localhostApiUrl,
             wsApiUrl: settings.wsLocalhostApiUrl,
             timeout: settings.hubTimeout,
-            remote: settings.remote
+            remote: !settings.local
           });
 
           EVT.setup(settings);
@@ -385,6 +386,9 @@
 
         if (user) {
           this.$.loginForm.close();
+          if (this.route.path === '/') {
+            this.set('route.path', '/thngs');
+          }
         } else {
           this.$.loginForm.open();
         }
@@ -428,18 +432,20 @@
        * @private
        */
       _toggleTargetEnvironment: function() {
-        this.set('settings.remote', !this.settings.remote);
+        this.set('settings.local', !this.settings.local);
       },
 
       /**
        * Reacts to target environment change,
        * setting appropriate icon to menu item.
        *
-       * @param {Boolean} isRemoteEnabled
+       * @param {Boolean} isLocalEnabled
        * @private
        */
-      _onTargetEnvironmentChange: function(isRemoteEnabled) {
-        this.$.targetEnvironmentIcon.icon = isRemoteEnabled ? 'th:cloud-on' : 'th:cloud-off';
+      _onTargetEnvironmentChange: function(isLocalEnabled) {
+        this.$.targetEnvironmentIcon.icon = isLocalEnabled ? 'th:cloud-off' : 'th:cloud-on';
+        this.$.targetEnvironmentLocal.classList.toggle('muted', !isLocalEnabled);
+        this.$.targetEnvironmentCloud.classList.toggle('muted', isLocalEnabled);
       },
 
       /**
@@ -493,6 +499,9 @@
           })
           .catch(function(e) {
             if (e.errors) {
+              // All errors from EVRYTHNG API will have 'errors'
+              // field in a payload, containing messages may be useful for
+              // a user.
               scope.showToast(e.errors[0]);
             } else {
               scope.showToast('Failed to login');
@@ -612,10 +621,19 @@
         });
       },
 
+      /**
+       * Toggles the evt trace tool which displays all requests made to EVRYTHNG API.
+       */
       toggleDevTool: function() {
         this.$.debugTool.opened = !this.$.debugTool.opened;
       },
 
+      /**
+       * When devtool is toggled, sets the correct class on the root element.
+       *
+       * @param {CustomEvent} e
+       * @private
+       */
       _onDevToolStateChanged: function(e) {
         this.classList.toggle('with-dev-tool', e.detail);
       }

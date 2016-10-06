@@ -74,6 +74,10 @@
       },
 
       jsonChanged: function() {
+        if (this.$.container.firstChild) {
+          this.$.container.removeChild(this.$.container.firstChild);
+        }
+
         this.$.container.appendChild(
           renderjson(this.json)
         );
