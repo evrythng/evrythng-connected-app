@@ -203,7 +203,7 @@
        */
       ensureFull: function() {
         if (this.events.length > 100) {
-          this.splice('events', this.events.length - 1, 1);
+          this.splice('events', 0, 1);
         }
       },
 
