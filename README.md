@@ -17,6 +17,7 @@ Browser support is basically the same as stated for Polymer ~1.*. All major ever
 #### Deploy your application to github pages
 
 ##### Initial setup
+- Ensure you have Bower and Polymer CLI installed (`npm i -g polymer-cli bower`)
 - Ensure you repository is public and github pages are enabled
 - Create gh-pages branch
 - Run `polymer build`, ensure build folder created, with bundled (HTTP 1.1) and unbundled (HTTP 2) builds
