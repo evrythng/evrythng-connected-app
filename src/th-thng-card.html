@@ -1,0 +1,27 @@
+<html><head><link rel="import" href="../evt-styles/evt-styles.html">
+
+<link rel="import" href="../../paper-item/paper-item.html">
+<link rel="import" href="../../paper-ripple/paper-ripple.html">
+<link rel="import" href="../../iron-flex-layout/iron-flex-layout.html">
+
+<link rel="import" href="../evt-entity/evt-entity-passport.html">
+
+</head><body><dom-module id="th-thng-card">
+  <template>
+    <style include="iron-flex evt-styles">
+      :host {
+        @apply(--layout-vertical);
+      }
+
+      evt-entity-passport {
+        padding: var(--evt-unit-sm);
+      }
+
+    </style>
+
+
+
+  </template>
+  <script>EvtElements.ThngCard=Polymer({is:"th-thng-card",behaviors:[EvtElements.behaviors.thng],factoryImpl:function(t){this.thng=t.thng}});</script>
+</dom-module>
+</body></html>

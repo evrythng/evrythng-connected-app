@@ -1,0 +1,26 @@
+<html><head></head><body><dom-module id="th-object-view">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+
+      h5 {
+        margin: 0;
+        font-weight: normal;
+      }
+
+      section {
+        margin-bottom: var(--app-unit-xs);
+      }
+    </style>
+
+    <template is="dom-repeat" items="{{props}}">
+      <section>
+        <h5>{{item.name}}</h5>
+        <span>{{item.value}}</span>
+      </section>
+    </template>
+  </template>
+  <script>Polymer({is:"th-object-view",behaviors:[TH.behaviors.objectProperties],properties:{object:Object,props:{type:Array,computed:"_toArray(object)"}},_toArray:function(r){return this._abstractListProperty(r)}});</script>
+</dom-module></body></html>

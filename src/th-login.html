@@ -1,0 +1,71 @@
+<html><head><link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-fab/paper-fab.html">
+<link rel="import" href="../bower_components/paper-styles/paper-styles-classes.html">
+
+<link rel="import" href="../bower_components/neon-animation/neon-animation.html">
+
+<link rel="import" href="shared-styles.html">
+<link rel="import" href="th-loader.html">
+
+</head><body><dom-module id="th-login">
+  <template>
+    <style include="iron-flex">
+      :host {
+        position: fixed;
+
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 103;
+        background: var(--paper-grey-100);
+      }
+
+      container {
+        @apply(--shadow-elevation-16dp);
+        background: white;
+        padding: 8px;
+      }
+
+      paper-dialog {
+        max-width: 400px;
+        width: 90vw;
+      }
+
+      paper-fab.facebook {
+        color: white;
+        background: #3b5998;
+      }
+    </style>
+
+    <paper-dialog modal="" id="loginForm" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+      <style>
+        .buttons {
+          margin-top: 32px !important;
+          margin-bottom: 8px !important;
+        }
+      </style>
+      <h2>Login</h2>
+      <form name="th-login-form">
+        <paper-input label="Email" value="{{creds.email}}"></paper-input>
+        <paper-input label="Password" type="password" value="{{creds.password}}"></paper-input>
+        <div class="buttons layout horizontal">
+          <paper-fab class="facebook" mini="" icon="th:facebook" on-tap="_loginWithFacebook"></paper-fab>
+          <span class="flex"></span>
+          <paper-button type="submit" noink="" on-tap="_loginWithCreds">Login</paper-button>
+        </div>
+      </form>
+    </paper-dialog>
+
+    <th-loader hidden$="{{!loading}}" size="80px"></th-loader>
+  </template>
+  <script>Polymer({is:"th-login",properties:{loading:{type:Boolean,value:!0},creds:{type:Object,value:{}}},_loginWithCreds:function(){this.fire("login",this.creds)},_loginWithFacebook:function(){this.fire("login","facebook")},open:function(){this.$.loginForm.open()},close:function(){this.$.loginForm.close()}});</script>
+</dom-module></body></html>

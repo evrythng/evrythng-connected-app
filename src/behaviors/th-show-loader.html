@@ -1,0 +1,4 @@
+<html><head><link rel="import" href="../../bower_components/paper-spinner/paper-spinner.html">
+
+<script>TH.behaviors.loader={properties:{loading:{type:Boolean,observer:"_onLoadingChanged"}},_loadingStyles:{true:{opacity:.5,pointerEvents:"none"},false:{opacity:1,pointerEvents:"all"},undefined:{opacity:1,pointerEvents:"all"}},_onLoadingChanged:function(){this.spinner||this._createSpinner(),this.mixin(this.style,this._loadingStyles[this.loading]),this.spinner.active=this.loading},_createSpinner:function(){this.spinner=document.createElement("paper-spinner"),this.spinner.active=!1,this._loaderContainer=this._loaderContainer?this.$$(this._loaderContainer):this;var i=this._loaderContainer.root;this.mixin(this.spinner.style,{position:"absolute",left:"calc(50% - 14px)",top:"calc(50% - 14px)"}),this.mixin(this.style,{position:"relative"}),Polymer.dom(i).appendChild(this.spinner)}};</script>
+</head><body></body></html>

@@ -1,0 +1,266 @@
+<html><head><link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/paper-styles/paper-styles.html">
+
+
+</head><body><dom-module id="shared-styles">
+  <template>
+    <style>
+      :root {
+        --app-unit-base: 8px;
+
+        --app-unit-xs: calc(var(--app-unit-base) * 0.5);
+        --app-unit-sm: calc(var(--app-unit-base) * 1);
+        --app-unit-md: calc(var(--app-unit-base) * 2);
+        --app-unit-lg: calc(var(--app-unit-base) * 4);
+        --app-unit-xl: calc(var(--app-unit-base) * 8);
+
+        --app-max-page-width: 700px;
+
+        --app-header-color: var(--paper-grey-50);
+        --app-drawer-color: var(--paper-grey-800);
+        --app-drawer-item-height: 40px;
+
+        --app-image-placeholder-background: var(--paper-grey-200);
+        --app-details-background: var(--paper-grey-200);
+        --app-chip-color: var(--paper-grey-200);
+
+        --app-boolean-property-color: var(--paper-blue-grey-500);
+        --app-boolean-text-color: var(--paper-grey-50);
+
+        --app-string-property-color: var(--paper-amber-500);
+        --app-string-text-color: var(--paper-grey-50);
+
+        --app-number-property-color: var(--paper-cyan-500);
+        --app-number-text-color: var(--paper-grey-50);
+
+        --app-circle: {
+          border-radius: 50%;
+        };
+
+        --app-layout-flex-25: {
+          @apply(--layout-flex);
+
+          width: 25%;
+        };
+
+
+        --app-layout-flex-33: {
+          @apply(--layout-flex);
+
+          width: 33.33%;
+        };
+
+        --app-layout-flex-50: {
+          @apply(--layout-flex);
+
+          width: 50%;
+        };
+
+        --app-layout-flex-66: {
+          @apply(--layout-flex);
+
+          width: 66.66%;
+        };
+
+
+        --app-layout-fit-drawer: {
+          width: 100%;
+          height: 100%;
+
+          display: block;
+        };
+
+        --app-drawer-dark-theme: {
+          color: var(--dark-theme-secondary-color);
+          background-color: var(--app-drawer-color);
+        };
+
+        --app-muted: {
+          color: var(--paper-grey-400);
+        }
+      }
+
+      paper-material {
+        background-color: white;
+
+        margin: var(--app-unit-md);
+        padding: var(--app-unit-sm);
+        color: var(--paper-grey-700);
+        border-radius: 2px;
+      }
+
+      app-header {
+        @apply(--shadow-elevation-2dp);
+        background-color: var(--app-header-color);
+      }
+
+      app-drawer > container {
+        @apply(--app-layout-fit-drawer);
+        @apply(--app-drawer-dark-theme);
+        @apply(--shadow-elevation-12dp);
+
+        background-color: var(--app-drawer-color);
+      }
+
+      app-drawer > container section {
+        margin-bottom: var(--app-unit-sm);
+      }
+
+      app-drawer > container section > label {
+        font-size: var(--app-unit-sm);
+      }
+
+      app-drawer footer {
+        width: 100%;
+        display: block;
+        position: absolute;
+        bottom: 140px;
+      }
+
+      app-drawer .th-powered-by {
+
+        color: currentColor;
+        text-decoration: none;
+
+        @apply(--layout-horizontal);
+        @apply(--layout-center);
+        @apply(--layout-center-justified);
+      }
+
+      app-drawer .th-powered-by img {
+        margin-left: var(--app-unit-sm);
+      }
+
+      app-header paper-icon-button {
+        --paper-icon-button-ink-color: white;
+      }
+
+      .header-logo {
+        padding: var(--app-unit-md);
+
+        @apply(--layout-vertical);
+        @apply(--layout-center);
+      }
+
+      .header-logo > img {
+        height: var(--app-unit-xl);
+      }
+
+      .mini-logo {
+        width: var(--app-unit-lg);
+        height: var(--app-unit-lg);
+      }
+
+      .empty-message {
+        text-align: center;
+      }
+
+      .circle {
+        @apply(--app-circle);
+
+        display: inline-block;
+
+        width: var(--app-unit-xl);
+        height: var(--app-unit-xl);
+
+        text-align: center;
+
+        color: var(--paper-grey-700);
+        background: var(--app-image-placeholder-background);
+
+        font-size: var(--app-unit-md);
+        line-height: var(--app-unit-xl);
+      }
+
+      h1 {
+        margin: 16px 0;
+
+        color: #212121;
+
+        font-size: 22px;
+      }
+
+      hr {
+        margin: 2px 0;
+        height: 1px;
+
+        background-color: var(--dark-theme-text-color);
+        opacity: .1;
+        border: 0px solid;
+      }
+
+      .drawer-item {
+        display: block;
+        text-decoration: none;
+
+        font-size: 14px;
+        line-height: 48px;
+        color: var(--dark-theme-secondary-color);
+
+        padding: 0 var(--app-unit-md);
+
+        transition: all .3s ease;
+      }
+
+      .drawer-item.iron-selected,
+      .drawer-item:hover {
+        color: var(--dark-theme-text-color);
+        background-color: var(--dark-theme-background-color);
+      }
+
+      .drawer-item > iron-icon {
+        margin-right: var(--app-unit-md);
+      }
+
+      .th-dropdown-content {
+        @apply(--shadow-elevation-4dp);
+        @apply(--layout-block);
+
+        min-width: 300px;
+        background-color: var(--paper-grey-50);
+      }
+
+      .th-dropdown-content iron-icon {
+        margin-right: var(--app-unit-md);
+      }
+
+      .th-entity-image {
+        @apply(--app-circle);
+
+        width: var(--app-unit-xl);
+        min-width: var(--app-unit-xl);
+        height: var(--app-unit-xl);
+        background-color: var(--app-image-placeholder-background);
+      }
+
+      .th-entity-name {
+        @apply(--paper-font-title);
+        @apply(--paper-font-common-nowrap);
+
+        font-size: 1.1em;
+      }
+
+      .th-entity-id {
+        @apply(--paper-font-subhead);
+        @apply(--paper-font-common-nowrap);
+        @apply(--app-muted);
+
+        font-size: 1em;
+      }
+
+      .target-environment {
+        @apply(--layout-horizontal);
+      }
+
+      .target-environment > span {
+        @apply(--layout-flex);
+      }
+
+      .target-environment > iron-icon {
+        @apply(--layout-self-center);
+      }
+
+    </style>
+  </template>
+</dom-module>
+</body></html>

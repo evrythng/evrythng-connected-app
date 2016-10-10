@@ -1,0 +1,76 @@
+<html><head><meta charset="UTF-8"><link rel="import" href="th-app.html"></head><body><div hidden="" by-vulcanize=""><dom-module id="iron-scroll-threshold" assetpath="../bower_components/iron-scroll-threshold/">
+</dom-module>
+
+<script>Polymer({is:"iron-scroll-threshold",properties:{scrollTarget:{type:Object,value:null},orient:{type:String,value:"v"},upperThreshold:{type:Number,value:null},lowerThreshold:{type:Number,value:null},upperTriggered:{type:Boolean,value:!1,readOnly:!0,notify:!0},lowerTriggered:{type:Boolean,value:!1,readOnly:!0,notify:!0}},observers:["setup(upperThreshold, lowerThreshold, scrollTarget, orient)"],ready:function(){this._boundScrollHandler=this.checkThreshold.bind(this)},detached:function(){this._scrollTarget&&this._scrollTarget.removeEventListener("scroll",this._boundScrollHandler)},setup:function(){var e=this.scrollTarget||this;this._scrollTarget&&this._scrollTarget!=e&&this._scrollTarget.removeEventListener("scroll",this._boundScrollHandler),e&&this._boundScrollHandler&&(this._scrollTarget=e,this._scrollTarget.addEventListener("scroll",this._boundScrollHandler)),this.style.overflow=e==this?"auto":null,this.scrollPosition="v"==this.orient?"scrollTop":"scrollLeft",this.sizeExtent="v"==this.orient?"offsetHeight":"offsetWidth",this.scrollExtent="v"==this.orient?"scrollHeight":"scrollWidth",this.upperThreshold||this._setUpperTriggered(!1),this.lowerThreshold||this._setLowerTriggered(!1)},checkThreshold:function(e){var r=this._scrollTarget[this.scrollPosition];if(this.upperTriggered||null===this.upperThreshold||r<this.upperThreshold&&((null===this.lowerThreshold||this.lowerTriggered)&&this._scrollTarget.removeEventListener("scroll",this._boundScrollHandler),this._setUpperTriggered(!0),this.fire("upper-trigger")),!this.lowerTriggered&&null!==this.lowerThreshold){var t=r+this._scrollTarget[this.sizeExtent],l=this._scrollTarget[this.scrollExtent];l-t<this.lowerThreshold&&((null===this.upperThreshold||this.upperTriggered)&&this._scrollTarget.removeEventListener("scroll",this._boundScrollHandler),this._setLowerTriggered(!0),this.fire("lower-trigger"))}},clearUpper:function(e){e?this._waitForMutation(function(){this.clearUpper()}.bind(this)):this.async(function(){this._setUpperTriggered(!1),this._scrollTarget.addEventListener("scroll",this._boundScrollHandler)})},clearLower:function(e){e?this._waitForMutation(function(){this.clearLower()}.bind(this)):this.async(function(){this._setLowerTriggered(!1),this._scrollTarget.addEventListener("scroll",this._boundScrollHandler)})},_waitForMutation:function(e){var r=new MutationObserver(function(t){e.call(this,r,t),r.disconnect()}.bind(this));r.observe(this._scrollTarget,{attributes:!0,childList:!0,subtree:!0})}});</script>
+<dom-module id="th-thng-list" assetpath="/">
+  <style include="shared-styles">
+    :host {
+      display: block;
+    }
+
+    paper-item {
+      @apply(--layout-horizontal);
+
+      padding: var(--app-unit-xs);
+    }
+
+    paper-item > div {
+      @apply(--layout-self-center);
+      @apply(--layout-vertical);
+    }
+
+    paper-item > iron-image {
+      margin-right: var(--app-unit-sm);
+    }
+
+
+  </style>
+  <template>
+
+    <div class="empty-message" hidden$="{{hasThngs}}">
+      <h4>No items found</h4>
+    </div>
+
+    <iron-scroll-threshold id="scroller" scroll-target="contentContainer" lower-threshold="100" on-lower-trigger="loadMoreThngs"></iron-scroll-threshold>
+    <iron-list items="{{thngs}}" id="list" indexas="id" selection-enabled="">
+      <template>
+        <paper-item>
+          <iron-image class="th-entity-image" src="[[item.photo]]" preload="" sizing="cover"></iron-image>
+          <div>
+            <span class="th-entity-name">[[item.name]]</span>
+            <span class="th-entity-id">[[item.id]]</span>
+          </div>
+
+          <paper-ripple></paper-ripple>
+        </paper-item>
+      </template>
+    </iron-list>
+
+    <div class="empty-message" hidden$="{{!loadingMore}}">
+      <paper-spinner active=""></paper-spinner>
+    </div>
+
+  </template>
+  <script>Polymer({is:"th-thng-list",properties:{query:{type:String,observer:"refresh"},selectedItem:{type:Object,notify:!0},user:{type:Object,observer:"refresh"},thngs:{type:Array,value:[]}},behaviors:[TH.behaviors.loader,TH.behaviors.showToast,TH.behaviors.scrollTarget,TH.behaviors.productCache,TH.behaviors.product],listeners:{"list.selected-item-changed":"_selectionChanged"},observers:["refresh(filter.*)"],ready:function(){this.$.scroller.scrollTarget=this.getScrollTarget()},refresh:function(){var e=this;!e.loading&&e.user&&(e.set("thngs",[]),this.initIterator(),this.loadMoreThngs())},initIterator:function(){var e=this,t={};e.query&&(t.params={filter:"name="+e.query+"*"}),this.iterator=this.user.thng().iterator(t)},loadMoreThngs:function(){var e=this;return e.set("loadingMore",!0),this.iterator.next().then(e.loadChunkReferences.bind(e)).then(e.loadToView.bind(e)).catch(function(){e.showToast("Failed to load thngs")}).then(function(){e.set("loadingMore",!1)})},loadChunkReferences:function(e){var t=this;return e.done?[]:Promise.all(e.value.map(function(e){return e.product?t._readProduct(e.product).then(function(r){e.product=r,e.photo=t._getProductPhoto(r)}).catch(function(){}):Promise.resolve()})).then(function(){return e.value})},loadToView:function(e){var t=this;e.forEach(function(e){t.push("thngs",e)}),t.$.scroller.clearLower(),t.set("hasThngs",t.thngs.length>0),t.async(function(){t.$.list.fire("iron-resize")})},_selectionChanged:function(e){this.fire("item-selected",e.detail.value)},_hasAnyThngs:function(e){return e&&e.length>0}});</script>
+</dom-module>
+</div><dom-module id="th-thngs">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        max-width: var(--app-max-page-width);
+      }
+    </style>
+
+    <app-route route="{{route}}" pattern="/:id" data="{{routeData}}" active="{{detailsActive}}"></app-route>
+
+    <paper-material elevation="2">
+      <th-thng-list id="list" hidden$="{{detailsActive}}" user="{{user}}" filter="{{filter}}" on-item-selected="_onThngSelected" query="{{query}}"></th-thng-list>
+      <th-thng-details hidden$="{{!detailsActive}}" user="{{user}}" thng-id="{{thngId}}" route="{{route}}"></th-thng-details>
+    </paper-material>
+
+  </template>
+
+  <script>Polymer({is:"th-thngs",properties:{query:String,thngId:String},observers:["fireResize(route.path)","fireResize(routeData.id)","_onIdChanged(routeData.id)"],_onThngSelected:function(e){var i=e.detail;i&&i.id&&this.set("route.path",i.id)},fireResize:function(){this.debounce("fire-resize",this._fireResize,20)},_fireResize:function(){this.$.list.$.list.fire("iron-resize")},_onIdChanged:function(e){"/thngs"===this.route.prefix&&(this.thngId=e)}});</script>
+</dom-module>
+</body></html>

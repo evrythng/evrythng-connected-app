@@ -1,0 +1,20 @@
+<html><head><link rel="import" href="loader-styles.html">
+
+</head><body><dom-module id="th-loader">
+  <template>
+    <style include="loader-styles"></style>
+
+    <container>
+      <div id="loader" class="th-loader">
+        <div class="loader-part loader-part-0"></div>
+        <div class="loader-part loader-part-1"></div>
+        <div class="loader-part loader-part-2"></div>
+        <div class="loader-part loader-part-3"></div>
+        <div class="loader-part loader-part-4"></div>
+        <div class="loader-part loader-part-5"></div>
+      </div>
+    </container>
+  </template>
+
+  <script>Polymer({is:"th-loader",classes:["pin","wi-fi","t-shirt","fridge"],properties:{size:{type:String,observer:"_onSizeChanged"}},ready:function(){var e=0,s=this,t=this.getLoader();setInterval(function(){t.classList.remove(s.classes[e]),e=e+1>s.classes.length?0:e+1,t.classList.add(s.classes[e])},1e3)},getLoader:function(){return this.$.loader},_onSizeChanged:function(e){var s=this.getLoader();s.style.width=e,s.style.height=e}});</script>
+</dom-module></body></html>

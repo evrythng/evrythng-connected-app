@@ -1,0 +1,145 @@
+<html><head><link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-data-table/iron-data-table.html">
+
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-tooltip/paper-tooltip.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../bower_components/paper-material/paper-material.html">
+<link rel="import" href="../bower_components/paper-autocomplete/paper-autocomplete.html">
+
+<link rel="import" href="../bower_components/neon-animation/neon-animation.html">
+
+<link rel="import" href="th-chip.html">
+<link rel="import" href="th-object-view.html">
+<link rel="import" href="shared-styles.html">
+
+</head><body><dom-module id="th-collection-details">
+  <template>
+    <style include="shared-styles iron-flex">
+      :host {
+        display: block;
+
+        max-width: var(--app-max-page-width);
+      }
+
+      h4 {
+        margin: var(--app-unit-xs) 0;
+      }
+
+      .passport {
+        @apply(--layout-vertical);
+        @apply(--layout-start);
+
+        margin: var(--app-unit-xs);
+      }
+
+      .traceable-properties {
+        @apply(--layout-horizontal);
+      }
+
+      .traceable-properties[mobile] {
+        @apply(--layout-vertical);
+      }
+
+      .traceable-properties > * {
+        @apply(--layout-flex);
+
+        margin: var(--app-unit-xs);
+      }
+
+      .custom-fields > * {
+        margin: var(--app-unit-xs);
+      }
+
+      .content-section {
+        padding: var(--app-unit-xs);
+        background-color: var(--app-details-background);
+      }
+
+      .actions {
+        margin: var(--app-unit-xs);
+      }
+
+      .action-type {
+        @apply(--layout-horizontal);
+      }
+
+      .thngs > paper-item {
+        @apply(--layout-horizontal);
+      }
+    </style>
+
+    <iron-media-query query="(max-width: 600px)" query-matches="{{mobile}}"></iron-media-query>
+
+    <paper-icon-button icon="arrow-back" on-tap="close"></paper-icon-button>
+
+    <section class="passport">
+      <div class="th-entity-name">[[collection.name]]</div>
+      <div class="th-entity-id">[[collection.id]]</div>
+    </section>
+
+    <section mobile$="{{mobile}}" class="traceable-properties">
+      <div flex="" hidden$="{{!_hasIdentifiers(collection)}}">
+        <h4>Identifiers</h4>
+        <th-object-view class="content-section" object="{{collection.identifiers}}"></th-object-view>
+      </div>
+
+      <div flex="" hidden$="{{!_hasTags(collection)}}">
+        <h4>Tags</h4>
+        <template is="dom-repeat" items="{{collection.tags}}">
+          <th-chip>{{item}}</th-chip>
+        </template>
+      </div>
+    </section>
+
+    <section class="custom-fields" hidden$="{{!_hasCustomFields(collection)}}">
+      <hr>
+      <h4>Custom Fields</h4>
+      <th-object-view class="content-section" object="{{collection.customFields}}"></th-object-view>
+    </section>
+
+    <hr>
+
+    <section class="actions">
+      <h4>Actions</h4>
+
+      <container>
+        <template is="dom-repeat" items="{{actionTypes}}">
+          <paper-item class="action-type" on-tap="createAction">
+            <span>{{_getActionTypeDisplayName(item)}}</span>
+            <span class="flex"></span>
+            <iron-icon icon="send"></iron-icon>
+            <paper-ripple></paper-ripple>
+          </paper-item>
+        </template>
+      </container>
+    </section>
+
+    <section class="thngs">
+      <h4>Thngs</h4>
+
+      <paper-autocomplete id="thngsSearch" label="Add thng" remote-source="true" on-autocomplete-change="debounceAutocomplete" on-autocomplete-selected="onThngSelected"></paper-autocomplete>
+
+      <container>
+        <iron-list id="collectionThngs" hidden$="{{!_hasAnyThngs(collection, collection.thngs)}}" items="{{collection.thngs}}">
+          <template>
+            <paper-item>
+              <span>{{item.name}}</span>
+              <span class="flex"></span>
+              <paper-icon-button icon="close" on-tap="onRemoveThngTap"></paper-icon-button>
+              <paper-ripple></paper-ripple>
+            </paper-item>
+          </template>
+        </iron-list>
+
+        <div class="empty-message" hidden$="{{_hasAnyThngs(collection, collection.thngs)}}">
+          <h4>No thngs in this collection</h4>
+        </div>
+      </container>
+    </section>
+  </template>
+  <script>Polymer({is:"th-collection-details",properties:{collectionId:String,collection:Object,user:Object},behaviors:[TH.behaviors.showToast,TH.behaviors.loader,TH.behaviors.collection,TH.behaviors.actionType],observers:["refresh(user, collectionId)"],refresh:function(){var t=this;this.user&&this.collectionId&&(t.set("loading",!0),this.readCollection().then(this.readCollectionThngs.bind(this)).then(this.readActionTypes.bind(this)).then(function(e){t.collection=e}).catch(function(){t.showToast("Failed to load collection")}).then(function(){t.set("loading",!1),t.fireResize()}))},close:function(){this.set("route.path","")},readCollection:function(){return this.user.collection(this.collectionId).read()},readThngsByName:function(t){return this.user.thng().read({params:{filter:"name="+t+"*"}})},readCollectionThngs:function(t){return this.user.thng().read({params:{filter:{collections:t.id},perPage:100}}).then(function(e){return t.thngs=e,t})},addThngToCollection:function(t){return this.collection.thng().update([t])},removeThngFromCollection:function(t){return this.collection.thng(t).delete()},readActionTypes:function(t){var e=this;return this._readActionTypes().then(function(n){return e.actionTypes=n.filter(e._isBuiltInActionType),t})},createAction:function(t){var e=t.model.item,n=this;n.user&&n.collection&&(n.set("loading",!0),n.user.action(e.name).create({collection:n.collection.id}).then(function(){n.showToast(e.name+" action created")}).catch(function(){n.showToast("Failed to create action")}).then(function(){n.set("loading",!1)}))},isBigValue:function(t){return String(t).length>32?"big":"small"},debounceAutocomplete:function(){this.debounce("thngs-autocomplete",this._doAutocomplete,300)},onThngSelected:function(t){var e=this,n=t.detail.value;e.set("loading",!0),e.addThngToCollection(n.id).then(function(){e.$.thngsSearch.text="",e.unshift("collection.thngs",n),e.showToast("Thng "+n.name+" added to collection"),e.fireResize()}).catch(function(){e.showToast("Failed to add thng to collection")}).then(function(){e.set("loading",!1)})},onRemoveThngTap:function(t){var e=this,n=t.model.item;e.removeThngFromCollection(n.id).then(function(){var t=e.collection.thngs.indexOf(n);e.splice("collection.thngs",t,1),e.showToast("Thng "+n.name+" removed from collection"),e.fireResize()}).catch(function(){e.showToast("Failed to remove")}).then(function(){e.set("loading",!1)})},_doAutocomplete:function(){var t=this,e=t.$.thngsSearch,n=e.text,o=t.collection.thngs.map(function(t){return t.id});t.set("loading",!0),t.readThngsByName(n).then(function(t){e.suggestions(t.filter(function(t){return o.indexOf(t.id)===-1}).map(function(t){return{text:t.name,value:t}}))}).catch(function(){t.showToast("Failed to read thngs")}).then(function(){t.set("loading",!1)})},fireResize:function(){this.$.collectionThngs.fire("iron-resize")}});</script>
+</dom-module>
+</body></html>

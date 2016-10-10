@@ -1,0 +1,64 @@
+<html><head><link rel="import" href="../bower_components/iron-image/iron-image.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-list/iron-list.html">
+<link rel="import" href="../bower_components/iron-scroll-threshold/iron-scroll-threshold.html">
+
+<link rel="import" href="../bower_components/paper-styles/typography.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="../bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import" href="shared-styles.html">
+
+</head><body><dom-module id="th-thng-list">
+  <style include="shared-styles">
+    :host {
+      display: block;
+    }
+
+    paper-item {
+      @apply(--layout-horizontal);
+
+      padding: var(--app-unit-xs);
+    }
+
+    paper-item > div {
+      @apply(--layout-self-center);
+      @apply(--layout-vertical);
+    }
+
+    paper-item > iron-image {
+      margin-right: var(--app-unit-sm);
+    }
+
+
+  </style>
+  <template>
+
+    <div class="empty-message" hidden$="{{hasThngs}}">
+      <h4>No items found</h4>
+    </div>
+
+    <iron-scroll-threshold id="scroller" scroll-target="contentContainer" lower-threshold="100" on-lower-trigger="loadMoreThngs"></iron-scroll-threshold>
+    <iron-list items="{{thngs}}" id="list" indexas="id" selection-enabled="">
+      <template>
+        <paper-item>
+          <iron-image class="th-entity-image" src="[[item.photo]]" preload="" sizing="cover"></iron-image>
+          <div>
+            <span class="th-entity-name">[[item.name]]</span>
+            <span class="th-entity-id">[[item.id]]</span>
+          </div>
+
+          <paper-ripple></paper-ripple>
+        </paper-item>
+      </template>
+    </iron-list>
+
+    <div class="empty-message" hidden$="{{!loadingMore}}">
+      <paper-spinner active=""></paper-spinner>
+    </div>
+
+  </template>
+  <script>Polymer({is:"th-thng-list",properties:{query:{type:String,observer:"refresh"},selectedItem:{type:Object,notify:!0},user:{type:Object,observer:"refresh"},thngs:{type:Array,value:[]}},behaviors:[TH.behaviors.loader,TH.behaviors.showToast,TH.behaviors.scrollTarget,TH.behaviors.productCache,TH.behaviors.product],listeners:{"list.selected-item-changed":"_selectionChanged"},observers:["refresh(filter.*)"],ready:function(){this.$.scroller.scrollTarget=this.getScrollTarget()},refresh:function(){var e=this;!e.loading&&e.user&&(e.set("thngs",[]),this.initIterator(),this.loadMoreThngs())},initIterator:function(){var e=this,t={};e.query&&(t.params={filter:"name="+e.query+"*"}),this.iterator=this.user.thng().iterator(t)},loadMoreThngs:function(){var e=this;return e.set("loadingMore",!0),this.iterator.next().then(e.loadChunkReferences.bind(e)).then(e.loadToView.bind(e)).catch(function(){e.showToast("Failed to load thngs")}).then(function(){e.set("loadingMore",!1)})},loadChunkReferences:function(e){var t=this;return e.done?[]:Promise.all(e.value.map(function(e){return e.product?t._readProduct(e.product).then(function(r){e.product=r,e.photo=t._getProductPhoto(r)}).catch(function(){}):Promise.resolve()})).then(function(){return e.value})},loadToView:function(e){var t=this;e.forEach(function(e){t.push("thngs",e)}),t.$.scroller.clearLower(),t.set("hasThngs",t.thngs.length>0),t.async(function(){t.$.list.fire("iron-resize")})},_selectionChanged:function(e){this.fire("item-selected",e.detail.value)},_hasAnyThngs:function(e){return e&&e.length>0}});</script>
+</dom-module>
+</body></html>

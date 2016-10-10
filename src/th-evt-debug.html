@@ -1,0 +1,19 @@
+<html><head></head><body><dom-module id="th-evt-debug">
+  <template>
+    <style>
+      :host {
+        @apply(--layout-block);
+        @apply(--layout-fixed-bottom);
+      }
+
+      container {
+        height: 50vh;
+      }
+    </style>
+
+    <container>
+      <h1>Debugger</h1>
+    </container>
+  </template>
+  <script>Polymer({is:"th-evt-debug",ready:function(){window.EVT&&(this.EVT=window.EVT,this.patchEVT())},patchEVT:function(){var e=this,o=EVT.api;EVT.api=function(t){return t=t||{},t.interceptors=t.interceptors||[],t.interceptors.push({request:e.logRequest,response:e.logResponse}),o(t)}},logRequest:function(e){console.log(e)},logResponse:function(e){return console.log(e),e}});</script>
+</dom-module></body></html>

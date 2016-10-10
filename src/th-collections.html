@@ -1,0 +1,251 @@
+<html><head><meta charset="UTF-8"><link rel="import" href="th-app.html"></head><body><div hidden="" by-vulcanize=""><dom-module id="th-collection-list" assetpath="/">
+  <style include="shared-styles">
+    :host {
+      display: block;
+    }
+
+    paper-item {
+      @apply(--layout-vertical);
+      @apply(--layout-start);
+
+      height: var(--app-unit-xl);
+      padding: var(--app-unit-xs);
+    }
+
+    .empty-message {
+      text-align: center;
+    }
+
+  </style>
+  <template>
+
+    <div class="empty-message" hidden$="{{_hasAnyCollections(collections)}}">
+      <h4>No items found</h4>
+    </div>
+
+    <iron-list items="{{collections}}" id="list" indexas="id" selection-enabled="">
+      <template>
+        <paper-item>
+          <div class="th-entity-name">[[item.name]]</div>
+          <div class="th-entity-id">[[item.id]]</div>
+          <paper-ripple></paper-ripple>
+        </paper-item>
+      </template>
+    </iron-list>
+  </template>
+  <script>Polymer({is:"th-collection-list",properties:{query:{type:String,observer:"refresh"},selectedItem:{type:Object,notify:!0},user:{type:Object,observer:"refresh"}},behaviors:[TH.behaviors.loader,TH.behaviors.showToast],listeners:{"list.selected-item-changed":"_selectionChanged"},observers:["refresh(filter.*)"],refresh:function(){var e=this,t={};e.query&&(t.params={filter:"name="+e.query+"*"}),!e.loading&&e.user&&(e.set("loading",!0),e.user.collection().read(t).then(function(t){e.collections=t}).catch(function(){e.showToast("Failed to read collections")}).then(function(){e.set("loading",!1),e.$.list.fire("iron-resize")}))},_selectionChanged:function(e){this.fire("item-selected",e.detail.value)},_hasAnyCollections:function(e){return e&&e.length>0}});</script>
+</dom-module>
+<dom-module id="paper-autocomplete" assetpath="../bower_components/paper-autocomplete/">
+  <style>
+    :host {
+      display: block;
+      box-sizing: border-box;
+      position: relative;
+    }
+    
+    .input-wrapper {
+      @apply(--layout-horizontal);
+    }
+    .input-wrapper paper-input {
+      @apply(--layout-flex);
+    }
+    #suggestionsWrapper {
+      display: none;
+      background-color: white;
+      max-height:252px;
+      overflow-y:scroll;
+      width: 100%;
+      position: absolute;
+      z-index: 1000;
+    }
+    :host[suggestions-in-overlay="true"] #suggestionsWrapper {
+    }
+    paper-item {
+      position: relative;
+      line-height:18px;
+    }
+    paper-item:hover{
+      background:#eee;
+      color:#333;
+      cursor:pointer;
+    }
+    
+    paper-item.active{
+      background:#eee;
+      color:#333;
+    }
+    #clear{
+      display: none;
+      margin-top:auto;
+    }
+    :host {
+      --paper-input-container-focus-color: #2196f3;
+      --paper-item-min-height: 36px;
+    }
+  </style>
+
+  <template>
+    <div class="input-wrapper">
+      <paper-input id="input" label="[[label]]" no-label-float="[[noLabelFloat]]" on-keyup="_onKeypress" disabled="{{disabled}}" auto-validate$="[[autoValidate]]" error-message$="[[errorMessage]]" required$="[[required]]" value="{{text}}"></paper-input>
+      <paper-icon-button id="clear" icon="clear" on-click="_clear"></paper-icon-button>
+    </div>
+    <paper-material elevation="1" id="suggestionsWrapper">
+      <template is="dom-repeat" items="{{_suggestions}}">
+        <paper-item on-click="_onSelect">
+          <div>{{item.text}}</div>
+          <paper-ripple></paper-ripple>
+        </paper-item>
+      </template>
+    </paper-material>
+  </template>
+</dom-module>
+
+<script>Polymer({is:"paper-autocomplete",properties:{autoValidate:{type:Boolean,value:!1},errorMessage:{type:String},label:String,noLabelFloat:{type:Boolean,value:!1},required:{type:Boolean,value:!1},source:Array,textProperty:{type:String,value:"text"},valueProperty:{type:String,value:"value"},value:{type:Object,notify:!0},text:{type:String,notify:!0},disableShowClear:{type:Boolean,value:!1},remoteSource:{type:Boolean,value:!1},eventNamespace:{type:String,value:"-"},minLength:{value:1},_suggestions:Array,_currentIndex:{value:-1},_scrollIndex:{value:0},_maxViewableItems:{value:7},_itemHeight:{value:36},_value:{value:void 0},_text:{value:void 0}},ready:function(){this._value=this.value},attached:function(){},detached:function(){},listeners:{"input.focus":"_onFocus","input.blur":"_onBlur"},_clear:function(){this.value=this._value,this.text=this._text,this.$.clear.style.display="none",this._hideSuggestionsWrapper(),this._emptyItems();var t={text:this.text,value:this.value};this._fireEvent(t,"reset")},_hideSuggestionsWrapper:function(){this.$.suggestionsWrapper.style.display="none"},_handleSuggestions:function(t){this.remoteSource?this._remoteSuggestions(t):this._createSuggestions(t)},_remoteSuggestions:function(t){var e=t.target.value,s=this.minLength,i={text:this.text,value:e};e&&e.length>=s?this._fireEvent(i,"change"):(this.$.clear.style.display="none",this._suggestions=[])},_bindSuggestions:function(t){t.length&&t.length>0?(this._suggestions=t,this._currentIndex=-1,this._scrollIndex=0,this.disableShowClear||(this.$.clear.style.display="block"),this.$.suggestionsWrapper.style.display="block"):(this.$.clear.style.display="none",this._suggestions=[])},_createSuggestions:function(t){this._currentIndex=-1,this._scrollIndex=0;var e=t.target.value,s=this.minLength;if(e&&e.length>=s){if(e=e.toLowerCase(),this.disableShowClear||(this.$.clear.style.display="block"),this.source&&this.source.length>0){this._suggestions=[];for(var i,n,r=this.source.length,l=0;l<r;l++){var o=this.source[l];"object"==typeof o?(i=o[this.textProperty],n=o[this.valueProperty]):(i=o.toString(),n=i),0===i.toLowerCase().indexOf(e)&&this.push("_suggestions",{text:i,value:n})}this._suggestions.length>0?this.$.suggestionsWrapper.style.display="block":this._hideSuggestionsWrapper()}}else this.$.clear.style.display="none",this._suggestions=[]},_selection:function(t){var e=this._suggestions[t],s=this;this.text=e.text,this.value=e.value,this._value=this.value,this._text=this.text,this.$.clear.style.display="none",this._emptyItems(),this._fireEvent(e,"selected"),setTimeout(function(){s._hideSuggestionsWrapper()},300)},_getItems:function(){return this.querySelectorAll("paper-item")},_emptyItems:function(){this._suggestions=[]},_getId:function(){var t=this.getAttribute("id");return t||(t=this.dataset.id),t},_removeActive:function(t){for(var e=0;e<t.length;e++)t[e].classList.remove("active")},_keydown:function(){var t=this._getItems(),e=t.length;e--,this._currentIndex<e&&(this._removeActive(t),this._currentIndex++,t[this._currentIndex].classList.add("active"),this._scrollDown())},_keyup:function(){var t=this._getItems();this._currentIndex>0&&(this._removeActive(t),this._currentIndex--,t[this._currentIndex].classList.add("active"),this._scrollUp())},_keyenter:function(){if("block"==this.$.suggestionsWrapper.style.display&&this._currentIndex>-1){var t=this._currentIndex;this._selection(t)}},_scrollDown:function(){var t=this._currentIndex-this._scrollIndex;if(t>=this._maxViewableItems){this._scrollIndex++;var e=this._scrollIndex*this._itemHeight,s=this.querySelector("paper-material");s.scrollTop=e}},_scrollUp:function(){var t=this._currentIndex-this._scrollIndex;if(t<0){this._scrollIndex--;var e=this._scrollIndex*this._itemHeight,s=this.querySelector("paper-material");s.scrollTop=e}},_fireEvent:function(t,e){var s=this._getId(),i="autocomplete"+this.eventNamespace+e;this.fire(i,{id:s,value:t.value,text:t.text,target:this,option:t})},_onKeypress:function(t){var e=t.which;40===e?this._keydown():38===e?this._keyup(t):13===e?this._keyenter():this._handleSuggestions(t)},_onSelect:function(t){var e=t.model.index;this._selection(e)},_onBlur:function(t){var e=this,s={text:this.text,value:this.value};this._fireEvent(s,"blur"),setTimeout(function(){e.$.clear.style.display="none",e._hideSuggestionsWrapper()},300)},_onFocus:function(t){var e={text:this.text,value:this.value};this._fireEvent(e,"focus")},getValue:function(){return this.value},getOption:function(){return{text:this.text,value:this.value}},setOption:function(t){this.text=t.text,this.value=t.value},disable:function(){this.disabled=!0,this.$.input.disabled=!0},enable:function(){this.disabled=!1,this.$.input.disabled=!1},suggestions:function(t){this._bindSuggestions(t)},validate:function(){return this.$.input.validate()},clear:function(){this._value="",this._text="",this._clear()},reset:function(){this._clear()},hideSuggestions:function(){var t=this;setTimeout(function(){t.$.clear.style.display="none",t._hideSuggestionsWrapper()},300)}});</script><dom-module id="th-collection-details" assetpath="/">
+  <template>
+    <style include="shared-styles iron-flex">
+      :host {
+        display: block;
+
+        max-width: var(--app-max-page-width);
+      }
+
+      h4 {
+        margin: var(--app-unit-xs) 0;
+      }
+
+      .passport {
+        @apply(--layout-vertical);
+        @apply(--layout-start);
+
+        margin: var(--app-unit-xs);
+      }
+
+      .traceable-properties {
+        @apply(--layout-horizontal);
+      }
+
+      .traceable-properties[mobile] {
+        @apply(--layout-vertical);
+      }
+
+      .traceable-properties > * {
+        @apply(--layout-flex);
+
+        margin: var(--app-unit-xs);
+      }
+
+      .custom-fields > * {
+        margin: var(--app-unit-xs);
+      }
+
+      .content-section {
+        padding: var(--app-unit-xs);
+        background-color: var(--app-details-background);
+      }
+
+      .actions {
+        margin: var(--app-unit-xs);
+      }
+
+      .action-type {
+        @apply(--layout-horizontal);
+      }
+
+      .thngs > paper-item {
+        @apply(--layout-horizontal);
+      }
+    </style>
+
+    <iron-media-query query="(max-width: 600px)" query-matches="{{mobile}}"></iron-media-query>
+
+    <paper-icon-button icon="arrow-back" on-tap="close"></paper-icon-button>
+
+    <section class="passport">
+      <div class="th-entity-name">[[collection.name]]</div>
+      <div class="th-entity-id">[[collection.id]]</div>
+    </section>
+
+    <section mobile$="{{mobile}}" class="traceable-properties">
+      <div flex="" hidden$="{{!_hasIdentifiers(collection)}}">
+        <h4>Identifiers</h4>
+        <th-object-view class="content-section" object="{{collection.identifiers}}"></th-object-view>
+      </div>
+
+      <div flex="" hidden$="{{!_hasTags(collection)}}">
+        <h4>Tags</h4>
+        <template is="dom-repeat" items="{{collection.tags}}">
+          <th-chip>{{item}}</th-chip>
+        </template>
+      </div>
+    </section>
+
+    <section class="custom-fields" hidden$="{{!_hasCustomFields(collection)}}">
+      <hr>
+      <h4>Custom Fields</h4>
+      <th-object-view class="content-section" object="{{collection.customFields}}"></th-object-view>
+    </section>
+
+    <hr>
+
+    <section class="actions">
+      <h4>Actions</h4>
+
+      <container>
+        <template is="dom-repeat" items="{{actionTypes}}">
+          <paper-item class="action-type" on-tap="createAction">
+            <span>{{_getActionTypeDisplayName(item)}}</span>
+            <span class="flex"></span>
+            <iron-icon icon="send"></iron-icon>
+            <paper-ripple></paper-ripple>
+          </paper-item>
+        </template>
+      </container>
+    </section>
+
+    <section class="thngs">
+      <h4>Thngs</h4>
+
+      <paper-autocomplete id="thngsSearch" label="Add thng" remote-source="true" on-autocomplete-change="debounceAutocomplete" on-autocomplete-selected="onThngSelected"></paper-autocomplete>
+
+      <container>
+        <iron-list id="collectionThngs" hidden$="{{!_hasAnyThngs(collection, collection.thngs)}}" items="{{collection.thngs}}">
+          <template>
+            <paper-item>
+              <span>{{item.name}}</span>
+              <span class="flex"></span>
+              <paper-icon-button icon="close" on-tap="onRemoveThngTap"></paper-icon-button>
+              <paper-ripple></paper-ripple>
+            </paper-item>
+          </template>
+        </iron-list>
+
+        <div class="empty-message" hidden$="{{_hasAnyThngs(collection, collection.thngs)}}">
+          <h4>No thngs in this collection</h4>
+        </div>
+      </container>
+    </section>
+  </template>
+  <script>Polymer({is:"th-collection-details",properties:{collectionId:String,collection:Object,user:Object},behaviors:[TH.behaviors.showToast,TH.behaviors.loader,TH.behaviors.collection,TH.behaviors.actionType],observers:["refresh(user, collectionId)"],refresh:function(){var t=this;this.user&&this.collectionId&&(t.set("loading",!0),this.readCollection().then(this.readCollectionThngs.bind(this)).then(this.readActionTypes.bind(this)).then(function(e){t.collection=e}).catch(function(){t.showToast("Failed to load collection")}).then(function(){t.set("loading",!1),t.fireResize()}))},close:function(){this.set("route.path","")},readCollection:function(){return this.user.collection(this.collectionId).read()},readThngsByName:function(t){return this.user.thng().read({params:{filter:"name="+t+"*"}})},readCollectionThngs:function(t){return this.user.thng().read({params:{filter:{collections:t.id},perPage:100}}).then(function(e){return t.thngs=e,t})},addThngToCollection:function(t){return this.collection.thng().update([t])},removeThngFromCollection:function(t){return this.collection.thng(t).delete()},readActionTypes:function(t){var e=this;return this._readActionTypes().then(function(n){return e.actionTypes=n.filter(e._isBuiltInActionType),t})},createAction:function(t){var e=t.model.item,n=this;n.user&&n.collection&&(n.set("loading",!0),n.user.action(e.name).create({collection:n.collection.id}).then(function(){n.showToast(e.name+" action created")}).catch(function(){n.showToast("Failed to create action")}).then(function(){n.set("loading",!1)}))},isBigValue:function(t){return String(t).length>32?"big":"small"},debounceAutocomplete:function(){this.debounce("thngs-autocomplete",this._doAutocomplete,300)},onThngSelected:function(t){var e=this,n=t.detail.value;e.set("loading",!0),e.addThngToCollection(n.id).then(function(){e.$.thngsSearch.text="",e.unshift("collection.thngs",n),e.showToast("Thng "+n.name+" added to collection"),e.fireResize()}).catch(function(){e.showToast("Failed to add thng to collection")}).then(function(){e.set("loading",!1)})},onRemoveThngTap:function(t){var e=this,n=t.model.item;e.removeThngFromCollection(n.id).then(function(){var t=e.collection.thngs.indexOf(n);e.splice("collection.thngs",t,1),e.showToast("Thng "+n.name+" removed from collection"),e.fireResize()}).catch(function(){e.showToast("Failed to remove")}).then(function(){e.set("loading",!1)})},_doAutocomplete:function(){var t=this,e=t.$.thngsSearch,n=e.text,o=t.collection.thngs.map(function(t){return t.id});t.set("loading",!0),t.readThngsByName(n).then(function(t){e.suggestions(t.filter(function(t){return o.indexOf(t.id)===-1}).map(function(t){return{text:t.name,value:t}}))}).catch(function(){t.showToast("Failed to read thngs")}).then(function(){t.set("loading",!1)})},fireResize:function(){this.$.collectionThngs.fire("iron-resize")}});</script>
+</dom-module>
+</div><dom-module id="th-collections">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+        max-width: var(--app-max-page-width);
+      }
+    </style>
+
+    <app-route route="{{route}}" pattern="/:id" data="{{routeData}}" active="{{detailsActive}}"></app-route>
+
+    <paper-material elevation="2">
+      <th-collection-list id="list" hidden$="{{detailsActive}}" user="{{user}}" filter="{{filter}}" on-item-selected="_onCollectionSelected" query="{{query}}"></th-collection-list>
+      <th-collection-details hidden$="{{!detailsActive}}" user="{{user}}" collection-id="{{collectionId}}" route="{{route}}"></th-collection-details>
+    </paper-material>
+
+
+  </template>
+
+  <script>Polymer({is:"th-collections",properties:{query:String},observers:["fireResize(route.*)","fireResize(routeData.*)","_onIdChanged(routeData.id)"],_onCollectionSelected:function(e){var i=e.detail;i&&i.id&&this.set("route.path",i.id)},fireResize:function(){this.debounce("fire-resize",this._fireResize,20)},_fireResize:function(){this.$.list.$.list.fire("iron-resize")},_onIdChanged:function(e){"/collections"===this.route.prefix&&(this.collectionId=e)}});</script>
+</dom-module>
+</body></html>

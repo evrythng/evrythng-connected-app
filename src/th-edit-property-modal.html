@@ -1,0 +1,111 @@
+<html><head><link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../bower_components/iron-media-query/iron-media-query.html">
+
+<link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+
+<link rel="import" href="shared-styles.html">
+
+</head><body><dom-module id="th-edit-property-modal">
+  <template>
+    <style include="shared-styles">
+      paper-dialog {
+        width: 90vw;
+        max-width: calc(var(--app-unit-xl) * 12);
+      }
+
+      paper-dialog container {
+        @apply(--layout-horizontal);
+      }
+
+      paper-dialog container[mobile] {
+        @apply(--layout-vertical);
+      }
+
+      .value {
+        transition: all .3s ease;
+      }
+
+      .value.big {
+        line-height: var(--app-unit-xl);
+        font-size: var(--app-unit-xl);
+        font-weight: lighter;
+      }
+
+      .value.medium {
+        line-height: var(--app-unit-lg);
+        font-size: var(--app-unit-lg);
+      }
+
+      .value.small {
+        line-height: calc(var(--app-unit-sm) * 3);
+        font-size: calc(var(--app-unit-sm) * 3);
+      }
+
+      .updated-at {
+        @apply(--paper-font-body1);
+        @apply(--app-muted);
+      }
+
+      local-time {
+        @apply(--app-muted);
+      }
+
+      .history-value {
+        @apply(--layout-horizontal);
+        @apply(--layout-justified);
+
+        margin-bottom: var(--app-unit-xs);
+      }
+
+      .history-value span:last-child {
+        text-align: right;
+      }
+    </style>
+
+    <iron-media-query query="(max-width: 600px)" query-matches="{{mobile}}"></iron-media-query>
+
+    <paper-dialog with-backdrop="" id="dialog" entry-animation="scale-up-animation" exit-animation="fade-out-animation">
+      <h2>{{property.name}}</h2>
+      <div class="current-value">
+        <div class$="value {{getValueSize(property.value)}}">
+          <span>{{property.value}}</span>
+        </div>
+        <div class="editor">
+          <template is="dom-if" if="{{property.type.isString}}">
+            <paper-textarea value="{{property.value}}"></paper-textarea>
+          </template>
+
+          <template is="dom-if" if="{{property.type.isNumber}}">
+            <paper-input type="number" value="{{property.value}}"></paper-input>
+          </template>
+
+          <template is="dom-if" if="{{property.type.isBoolean}}">
+            <paper-toggle-button checked="{{property.value}}"></paper-toggle-button>
+          </template>
+        </div>
+        <div class="updated-at">
+          {{getLastUpdate(property)}}
+        </div>
+      </div>
+      <h3>History</h3>
+      <paper-dialog-scrollable>
+        <template is="dom-repeat" items="{{property.history}}">
+          <div class="history-value">
+            <local-time datetime$="{{toISOString(item.timestamp)}}">{{toLocalTime(item.timestamp)}}</local-time>
+            <span class="flex"></span>
+            <span>{{item.value}}</span>
+          </div>
+        </template>
+      </paper-dialog-scrollable>
+      <div class="buttons layout horizontal">
+        <paper-button dialog-dismiss="">Cancel</paper-button>
+        <paper-button on-tap="update">Update</paper-button>
+      </div>
+    </paper-dialog>
+  </template>
+  <script>Polymer({is:"th-edit-property-modal",properties:{property:{type:Object}},observers:["valueChanged(property.value)"],behaviors:[TH.behaviors.showToast,TH.behaviors.loader],_loaderContainer:"paper-dialog",open:function(){this.$.dialog.open()},close:function(){this.$.dialog.close(),this.$.dialog.parentNode.removeChild(this.$.dialog)},valueChanged:function(){this.$.dialog.fire("iron-resize")},toISOString:function(t){return new Date(t).toISOString()},toLocalTime:function(t){return new Date(t).toLocaleString()},getLastUpdate:function(t){return this.toLocalTime(t.history[0].timestamp)},getValueSize:function(t){var e=String(t).length;return e<32?"big":e<128?"medium":"small"},update:function(){var t=this;t.set("loading",!0),t.property.update(this.property.type.output(this.property.value)).then(t.close.bind(t)).catch(function(){t.showToast("Property update failed")}).then(function(){t.set("loading",!1)})}});</script>
+</dom-module></body></html>
