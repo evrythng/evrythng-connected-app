@@ -13,3 +13,15 @@ Go to Settings and change the 'Local Hub Address' setting. This will be persiste
 #### Supported browsers
 
 Browser support is basically the same as stated for Polymer ~1.*. All major evergreen browsers.
+
+#### Deploy your application to github pages
+
+##### Initial setup
+- Ensure you repository is public and github pages are enabled
+- Create gh-pages branch
+- Run `polymer build`, ensure build folder created, with bundled (HTTP 1.1) and unbundled (HTTP 2) builds
+- `git add build/bundled && git commite -m "Added built application to gh-pages"`
+
+##### Deploy changes
+- `polymer build`
+- `git subtree push --prefix build/bundled origin gh-pages`
