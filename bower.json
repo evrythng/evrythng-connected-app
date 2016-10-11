@@ -19,7 +19,7 @@
     "app-storage": "^0.9.7",
     "paper-toast": "^1.3.0",
     "iron-image": "^1.2.5",
-    "evrythng": "^3.7.0",
+    "evrythng": "4.0.1",
     "evrythng-ws": "^2.0.2",
     "evrythng-hub": "^1.2.2",
     "neon-animation": "^1.2.4",

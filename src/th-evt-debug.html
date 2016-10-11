@@ -121,26 +121,13 @@
         }
       },
 
-      // TODO: Remove when fix released
       ready: function() {
-        this.patchEVT();
-      },
-
-      // TODO: Remove when fix released
-      patchEVT: function() {
         var scope = this;
-        var original = EVT.api;
 
-        EVT.api = function(options) {
-          options = options || {};
-          options.interceptors = options.interceptors || [];
-          options.interceptors.push({
-            request: scope.logRequest.bind(scope),
-            response: scope.logResponse.bind(scope)
-          });
-
-          return original(options);
-        };
+        EVT.settings.interceptors.push({
+          request: scope.logRequest.bind(scope),
+          response: scope.logResponse.bind(scope)
+        });
       },
 
       /**

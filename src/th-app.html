@@ -317,24 +317,17 @@
         // Application entity defines the certain scope of
         // access and therefore, have appropriate api key.
         var app = new EVT.App({
-          apiKey: this.settings.apiKey
+          apiKey: this.settings.apiKey,
+          facebook: {
+            version: 'v2.7',
+            cookie: true
+          }
         });
 
         // TIP: EVT.App exposes $init property,
         // containing a promise, allowing to wait till
         // the application is ready for action
-        return app.$init.then(function() {
-          // TODO: remove after fix released
-          return scope._initFacebook(app.socialNetworks.facebook.appId)
-            .then(function (response) {
-              if (response.status === 'connected') {
-                return scope._authFacebook(response, app);
-              } else {
-                return response;
-              }
-            });
-          })
-          .then(function(response) {
+        return app.$init.then(function(response) {
             if (response.user) {
               // If initialisation response have
               // a user object, it means that previous session
@@ -490,11 +483,7 @@
             // If authentication request have user
             // inside, expose it to the application.
             if (res.user) {
-              // TODO: Remove when fix released
-              return res.user.update()
-                .then(function() {
-                  scope.set('user', res.user);
-                });
+              scope.set('user', res.user);
             }
           })
           .catch(function(e) {
@@ -553,72 +542,6 @@
           .then(function() {
             scope.set('loading', false);
           });
-      },
-
-      // TODO: Remove when fix released
-      _initFacebook: function(appId) {
-        var scope = this;
-
-        return new Promise(function(resolve, reject) {
-          (function(d, s, id){
-            var js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) return;
-            js = d.createElement(s); js.id = id;
-            js.src = "//connect.facebook.net/en_US/sdk.js";
-            fjs.parentNode.insertBefore(js, fjs);
-          }(document, 'script', 'facebook-jssdk'));
-
-          window.fbAsyncInit = function() {
-            FB.init({
-              appId: appId,
-              status: true,
-              cookie: true,
-              version: 'v2.7'
-            });
-
-            FB.getLoginStatus(function (response) {
-              if (response.status === 'connected') {
-                FB.api('/me', {
-                  fields: 'id,first_name,last_name,gender,link,picture,locale,name,timezone,updated_time,verified'
-                }, function (userInfo) {
-                  resolve(scope.mixin(response, { user: userInfo }));
-                });
-              } else {
-                resolve(response);
-              }
-            });
-          };
-        });
-      },
-
-      // TODO: Remove when fix released
-      _authFacebook: function(response, app) {
-        var scope = this;
-
-        return EVT.api({
-          url: '/auth/facebook',
-          method: 'post',
-          data: {
-            access: {
-              token: response.authResponse.accessToken
-            }
-          }
-        }).then(function(access) {
-          var user = new EVT.User({
-            id: access.evrythngUser,
-            apiKey: access.evrythngApiKey
-          }, app);
-
-          scope.mixin(user, {
-            facebook: response.user
-          });
-
-          response.user = user;
-
-          return user.update();
-        }).then(function() {
-          return response;
-        });
       },
 
       /**
