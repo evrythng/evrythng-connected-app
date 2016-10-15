@@ -106,17 +106,12 @@
       ],
 
       /**
-       * Initialises voice recognition if possible
-       */
-      create: function() {
-        this.initVoiceRecognition();
-      },
-
-      /**
        * Imperatively assigns necessary listeners,
        * avoiding mess with app-header-layout
        */
       ready: function() {
+        this.initVoiceRecognition();
+
         this.async(function() {
           this.$.trigger.addEventListener('tap', this.openSearch.bind(this));
           this.$.close.addEventListener('tap', this.closeSearch.bind(this));
