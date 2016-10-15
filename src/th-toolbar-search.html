@@ -243,7 +243,7 @@
           el = document.createElement('voice-recognition');
 
           el.addEventListener('error', this.recognitionFailed.bind(this));
-          el.addEventListener('result', this.setRaw);
+          el.addEventListener('result', this.setRaw.bind(this));
 
           Polymer.dom(this.root).appendChild(el);
           this.$.voiceRecognition = el;
