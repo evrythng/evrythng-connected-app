@@ -1,28 +1,40 @@
-# evrythng-webapp
+# EVRYTHNG Sample Web App
 
-Sample mobile web app that interacts with EVRYTHNG. Built with Web Components + Polymer + Material Design.
+This project is a sample mobile web app that interacts with the EVRYTHNG API as well as the THNGHUB local gateway. 
+It was built with Web Components + Polymer + Material Design.
 
-All requests are done locally if there is an EVRYTHNG Hub in the network and its address is configured correctly in the application.
+All requests are done locally if there is an EVRYTHNG THNGHUB in the network and its address is configured correctly in the application.
 
-Change Hub Address
+## Changing Hub Address
 
 Open up the application, logging in with any existing Facebook user.
 
 Go to Settings and change the 'Local Hub Address' setting. This will be persisted locally, so the next time you open the application it will use that address by default.
 
-#### Supported browsers
+## Supported browsers
 
 Browser support is basically the same as stated for Polymer ~1.*. All major evergreen browsers.
 
-#### Deploy your application to github pages
+### Building the App
 
-##### Initial setup
-- Ensure you have Bower and Polymer CLI installed (`npm i -g polymer-cli bower`)
+Ensure you have Bower and Polymer CLI installed: 
+```
+npm i -g polymer-cli bower
+```
+Install the dependencies:
+```
+bower install
+```
+Build the app:
+```polymer build
+```
+
+### Deploying to GitHub pages
 - Ensure you repository is public and github pages are enabled
 - Create gh-pages branch
 - Run `polymer build`, ensure build folder created, with bundled (HTTP 1.1) and unbundled (HTTP 2) builds
-- `git add build/bundled && git commite -m "Added built application to gh-pages"`
+- `git add build/bundled && git commit -m "Added app to gh-pages"`
 
-##### Deploy changes
+#### Deploying changes
 - `polymer build`
 - `git subtree push --prefix build/bundled origin gh-pages`
