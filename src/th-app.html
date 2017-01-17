@@ -18,6 +18,8 @@
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-input/paper-textarea.html">
 <link rel="import" href="../bower_components/paper-toggle-button/paper-toggle-button.html">
 
 <script src="../bower_components/lodash/lodash.js"></script>
@@ -131,12 +133,28 @@
 
     <th-login id="loginForm" hidden$="[[_isReady(app, user)]]" loading="{{loading}}" on-login="_onLogin"></th-login>
     <th-evt-debug id="debugTool" on-state-changed="_onDevToolStateChanged"></th-evt-debug>
-    <paper-dialog id="resetSettings">
-      <h2>Configuration error</h2>
-      <p>Do you want to reset settings to defaults?</p>
+    <paper-dialog id="initialSetup" dynamic-align modal>
+      <h2>Initial setup required</h2>
+      <p>No configuration found, please provide defaults to access your data.</p>
+
+      <paper-textarea id="apiKey"
+                      label="Application API Key"
+                      required auto-validate
+                      on-input="notifyInitialSetupResize"
+                      value="{{settings.apiKey}}"
+                      placeholder="Application API Key"
+      ></paper-textarea>
+
+      <paper-input id="apiUrl"
+                   label="EVRYTHNG API Address"
+                   required auto-validate
+                   error-message="Please type a URL."
+                   type="url"
+                   value="{{settings.apiUrl}}"
+                   placeholder="E.g. https://api.evrythng.com"
+      ></paper-input>
       <div class="buttons">
-        <paper-button dialog-dismiss>No</paper-button>
-        <paper-button on-tap="resetSettings">Yes</paper-button>
+        <paper-button on-tap="doInitialSetup">Save</paper-button>
       </div>
     </paper-dialog>
   </template>
@@ -204,7 +222,7 @@
          * Application API Key
          * this key user to create EVT.Application instance
          */
-        apiKey: '1olb2yZkSav8VXpCu287BtFEG3oXx13eOgZCb0VAilM3jri0Rz3aqzzWMPe6paZMXNDbTPVELL9jzig3',
+        apiKey: '',
 
         /**
          * URL of EVRYTHNG API
@@ -343,7 +361,7 @@
           .catch(function(e) {
             // Failed to instantiate an application,
             // this may be caused by a configuration error
-            scope.$.resetSettings.open();
+            scope.$.initialSetup.open();
           });
       },
 
@@ -531,17 +549,27 @@
        * Handles unsuccessful start of application after incorrect
        * configuration.
        */
-      resetSettings: function() {
+      doInitialSetup: function() {
         var scope = this;
 
-        scope.$.resetSettings.close();
-        scope._setDefaultSettings();
         scope.set('loading', true);
 
         this.initApp()
           .then(function() {
             scope.set('loading', false);
+            scope.$.initialSetup.close();
+          })
+          .catch(function() {
+            scope.showToast('Failed to initialise with given config, please ensure that it\'s valid.');
           });
+
+      },
+
+      /**
+       * Notifies the initial setup modal about required layout recalculation.
+       */
+      notifyInitialSetupResize: function() {
+        this.$.initialSetup.notifyResize();
       },
 
       /**
