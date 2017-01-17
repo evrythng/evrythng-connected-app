@@ -9,9 +9,10 @@ All requests are done locally if there is an EVRYTHNG THNGHUB in the network and
 
 ### Prerequisites
 For this app to work you'll need:
-1) An EVRYTHNG account
-2) To have created an EVRYTHNG app in your account
-3) Have either Facebook login activated for your EVRYTHNG app, or a valid App User's credentials (email + password)
+
+- An EVRYTHNG account
+- To have created an EVRYTHNG App in your account
+- Have either Facebook login activated for your EVRYTHNG app, or a valid App User's credentials (email + password)
 
 ### Changing the THNGHUB Address
 
