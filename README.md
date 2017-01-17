@@ -43,7 +43,7 @@ polymer serve
 - Ensure you repository is public and github pages are enabled
 - Create gh-pages branch
 - Run `polymer build`, ensure build folder created, with bundled (HTTP 1.1) and unbundled (HTTP 2) builds
-- `git add build/bundled && git commit -m "Added app to gh-pages"`
+- `git add -f build/bundled && git commit -m "Added app to gh-pages"`
 
 ### Deploying changes
 - `polymer build`
