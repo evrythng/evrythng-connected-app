@@ -1,6 +1,6 @@
 # EVRYTHNG Sample Web App
 
-This project is a sample mobile web app that interacts with the EVRYTHNG API as well as the THNGHUB local gateway. 
+This project is a sample mobile web app that interacts with the [EVRYTHNG API](https://developers.evrythng.com/) as well as the [THNGHUB](https://developers.evrythng.com/docs/thng-hub) local gateway. 
 It was built with Web Components + Polymer + Material Design.
 
 All requests are done locally if there is an EVRYTHNG THNGHUB in the network and its address is configured correctly in the application.
