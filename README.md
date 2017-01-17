@@ -26,7 +26,8 @@ Install the dependencies:
 bower install
 ```
 Build the app:
-```polymer build
+```
+polymer build
 ```
 
 ### Deploying to GitHub pages
