@@ -54,7 +54,7 @@
         <paper-input label="Email" value="{{creds.email}}"></paper-input>
         <paper-input label="Password" type="password" value="{{creds.password}}"></paper-input>
         <div class="buttons layout horizontal">
-          <paper-fab class="facebook" mini icon="th:facebook" on-tap="_loginWithFacebook"></paper-fab>
+          <paper-fab id="facebookLogin" class="facebook" mini icon="th:facebook" on-tap="_loginWithFacebook"></paper-fab>
           <span class="flex"></span>
           <paper-button type="submit" noink on-tap="_loginWithCreds">Login</paper-button>
         </div>
@@ -98,6 +98,10 @@
        */
       close: function() {
         this.$.loginForm.close();
+      },
+
+      setFacebookAvailable: function(isFacebookAvailable) {
+        this.$.facebookLogin.style.visibility = isFacebookAvailable ? 'visible' : 'hidden';
       },
 
       /**

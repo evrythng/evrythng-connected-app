@@ -346,7 +346,7 @@
         // containing a promise, allowing to wait till
         // the application is ready for action
         return app.$init.then(function(response) {
-            if (response.user) {
+            if (response && response.user) {
               // If initialisation response have
               // a user object, it means that previous session
               // is still active. We can act on behalf of this User instance
@@ -354,6 +354,10 @@
             } else {
               // Otherwise, invite to login
               scope.$.loginForm.open();
+
+              if (!response) {
+                scope.$.loginForm.setFacebookAvailable(false);
+              }
             }
 
             scope.set('app', app);
