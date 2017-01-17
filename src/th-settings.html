@@ -134,7 +134,12 @@
        */
       dispatchUpdate: function() {
         this.mixin(this.settings, this.raw);
+        this.fire('settings-change', this.settings);
         this.showToast('Application settings updated');
+
+        setTimeout(function() {
+          window.location.pathname = '';
+        }, 1500);
       }
     });
   </script>

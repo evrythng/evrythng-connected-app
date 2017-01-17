@@ -125,7 +125,7 @@
             role="main">
           <th-thngs name="thngs" user="{{user}}" route="{{subroute}}" query="{{query}}"></th-thngs>
           <th-collections name="collections" user="{{user}}" route="{{subroute}}" query="{{query}}"></th-collections>
-          <th-settings name="settings" settings="{{settings}}" route="{{subroute}}" query="{{query}}"></th-settings>
+          <th-settings name="settings" settings="{{settings}}" route="{{subroute}}" query="{{query}}" on-settings-change="_onSettingsChange"></th-settings>
           <th-view404 name="view404"></th-view404>
         </iron-pages>
       </app-header-layout>
@@ -358,7 +358,7 @@
 
             scope.set('app', app);
           })
-          .catch(function(e) {
+          .catch(function() {
             // Failed to instantiate an application,
             // this may be caused by a configuration error
             scope.$.initialSetup.open();
