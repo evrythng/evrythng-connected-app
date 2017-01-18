@@ -135,7 +135,7 @@
     <th-evt-debug id="debugTool" on-state-changed="_onDevToolStateChanged"></th-evt-debug>
     <paper-dialog id="initialSetup" dynamic-align modal>
       <h2>Initial setup required</h2>
-      <p>No configuration found, please provide defaults to access your data.</p>
+      <p>Incorrect or missing configuration prevents from initialising application. Please check and fill the fields below.</p>
 
       <paper-textarea id="apiKey"
                       label="Application API Key"
@@ -557,16 +557,7 @@
         var scope = this;
 
         scope.set('loading', true);
-
-        this.initApp()
-          .then(function() {
-            scope.set('loading', false);
-            scope.$.initialSetup.close();
-          })
-          .catch(function() {
-            scope.showToast('Failed to initialise with given config, please ensure that it\'s valid.');
-          });
-
+        window.location.pathname = '';
       },
 
       /**
