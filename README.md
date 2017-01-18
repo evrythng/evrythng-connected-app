@@ -1,6 +1,6 @@
 # EVRYTHNG Sample Web App
 
-This project is a sample mobile web app that interacts with the [EVRYTHNG API](https://developers.evrythng.com/) as well as the [THNGHUB](https://developers.evrythng.com/docs/thng-hub) local gateway. 
+This project is a sample mobile web app that interacts with connected products using the [EVRYTHNG API](https://developers.evrythng.com/) as well as the [THNGHUB](https://developers.evrythng.com/docs/thng-hub) local gateway. 
 It was built with Web Components + Polymer + Material Design.
 
 All requests are done locally if there is an EVRYTHNG THNGHUB in the network and its address is configured correctly in the application.
@@ -56,7 +56,7 @@ You can deploy the app on any server but here are a few examples:
 - `git add -f build/bundled && git commit -m "Added app to gh-pages"`
 - `git subtree push --prefix build/bundled origin gh-pages`
 
-## To netlify
+### To Netlify
 1. Login at netlify.com
 2. go to [dashboard](https://app.netlify.com/)
 3. click 'add a new project'
