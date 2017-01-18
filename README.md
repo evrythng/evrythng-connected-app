@@ -25,6 +25,9 @@ Ensure you have Bower and Polymer CLI installed:
 npm i -g polymer-cli bower
 ```
 Install the dependencies:
+
+> Note: If prompted, choose Polymer version 1.6.0 or above.
+
 ```
 bower install
 ```
