@@ -1,4 +1,4 @@
-# EVRYTHNG Sample Web App
+# EVRYTHNG Sample Web App for Connected Products
 
 This project is a sample mobile web app that interacts with connected products using the [EVRYTHNG API](https://developers.evrythng.com/) as well as the [THNGHUB](https://developers.evrythng.com/docs/thng-hub) local gateway. 
 It was built with Web Components + Polymer + Material Design.
