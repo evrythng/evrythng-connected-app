@@ -5,10 +5,6 @@ It was built with Web Components + Polymer + Material Design.
 
 All requests are done locally if there is an EVRYTHNG THNGHUB in the network and its address is configured correctly in the application.
 
-## Demo
-
-A demo version of this Web app is deployed on: http://connected-demo.evrythng.com/
-
 ## Setup
 
 ### Prerequisites
@@ -17,6 +13,14 @@ For this app to work you'll need:
 - An EVRYTHNG account
 - To have created an EVRYTHNG App in your account
 - Have either Facebook login activated for your EVRYTHNG app, or a valid App User's credentials (email + password)
+
+### Demo
+
+A demo version of this Web app is deployed on: https://connected-demo.evrythng.com/
+or scan:
+![Alt text](https://tn.gg/jEXRpN43.qr)
+
+Note that you'll be prompted for a valid EVRYTHNG Tusted App Key.
 
 ### Changing the THNGHUB Address
 
