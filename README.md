@@ -18,6 +18,7 @@ For this app to work you'll need:
 
 A demo version of this Web app is deployed on: https://connected-demo.evrythng.com/
 or scan:
+
 ![Alt text](https://tn.gg/jEXRpN43.qr)
 
 Note that you'll be prompted for a valid EVRYTHNG Tusted App Key.
