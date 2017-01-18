@@ -1,6 +1,6 @@
 {
-  "name": "THNGHUB",
-  "short_name": "THNGHUB",
+  "name": "Evrythng Connected App",
+  "short_name": "EVRYTHNG",
   "start_url": "/?homescreen=1",
   "display": "standalone",
   "theme_color": "#424242",
