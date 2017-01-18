@@ -1,7 +1,7 @@
 {
-  "name": "polymer-starter-kit",
+  "name": "THNGHUB",
   "authors": [
-    "The Polymer Authors"
+    "EVRYTHNG Team"
   ],
   "private": true,
   "dependencies": {
@@ -44,5 +44,9 @@
   },
   "devDependencies": {
     "web-component-tester": "^4.0.0"
+  },
+  "resolutions": {
+    "evrythng": "^4.2.0",
+    "polymer": "^1.6.0"
   }
 }
