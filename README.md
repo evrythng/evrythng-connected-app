@@ -42,26 +42,29 @@ polymer build
 polymer serve
 ```
 
-## Deploying to GitHub pages
+## Supported browsers
+Browser support is basically the same as stated for Polymer ~1.*. All major evergreen browsers.
+
+## Deploying 
+
+You can deploy the app on any server but here are a few examples:
+
+### To GitHub pages
 - Ensure you repository is public and github pages are enabled
 - Create gh-pages branch
 - Run `polymer build`, ensure build folder created, with bundled (HTTP 1.1) and unbundled (HTTP 2) builds
 - `git add -f build/bundled && git commit -m "Added app to gh-pages"`
 - `git subtree push --prefix build/bundled origin gh-pages`
 
-## Deploying to netlify
+## To netlify
 1. Login at netlify.com
 2. go to [dashboard](https://app.netlify.com/)
 3. click 'add a new project'
 4. choose 'github'
 5. select forked 'evrythng-webapp'
-6. fill the fields
-6.1. branch: master
-6.2. build cmd: npm i polymer-cli -g && polymer build
-6.3. public folder: build/bundled
+6. fill the fields: branch: `master`, public folder: `build/bundled`, build cmd: `npm i polymer-cli -g && polymer build`
 7. Click 'create'
 8. Wait till first build is finished
-9. Enjoy site redeploy on every push to master
+9. Enjoy and redeploy on every push to master
 
-## Supported browsers
-Browser support is basically the same as stated for Polymer ~1.*. All major evergreen browsers.
+
