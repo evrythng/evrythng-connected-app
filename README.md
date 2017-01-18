@@ -47,14 +47,7 @@ Browser support is basically the same as stated for Polymer ~1.*. All major ever
 
 ## Deploying 
 
-You can deploy the app on any server but here are a few examples:
-
-### To GitHub pages
-- Ensure you repository is public and github pages are enabled
-- Create gh-pages branch
-- Run `polymer build`, ensure build folder created, with bundled (HTTP 1.1) and unbundled (HTTP 2) builds
-- `git add -f build/bundled && git commit -m "Added app to gh-pages"`
-- `git subtree push --prefix build/bundled origin gh-pages`
+You can deploy the app on any server such as GitHub pages but here are some examples
 
 ### To Netlify
 1. Login at netlify.com
