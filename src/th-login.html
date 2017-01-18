@@ -8,6 +8,8 @@
 
 <link rel="import" href="../bower_components/neon-animation/neon-animation.html">
 
+<link rel="import" href="../bower_components/gold-email-input/gold-email-input.html">
+
 <link rel="import" href="shared-styles.html">
 <link rel="import" href="th-loader.html">
 
@@ -50,9 +52,9 @@
         }
       </style>
       <h2>Login</h2>
-      <form name="th-login-form">
-        <paper-input label="Email" value="{{creds.email}}"></paper-input>
-        <paper-input label="Password" type="password" value="{{creds.password}}"></paper-input>
+      <form id="credentialsForm" name="th-login-form">
+        <gold-email-input label="Email" value="{{creds.email}}" name="email" autocomplete="email"></gold-email-input>
+        <paper-input label="Password" type="password" value="{{creds.password}}" name="password"></paper-input>
         <div class="buttons layout horizontal">
           <paper-fab id="facebookLogin" class="facebook" mini icon="th:facebook" on-tap="_loginWithFacebook"></paper-fab>
           <span class="flex"></span>
@@ -100,6 +102,10 @@
         this.$.loginForm.close();
       },
 
+      /**
+       * Sets 'login with facebook' button visibility based on given
+       * boolean
+       */
       setFacebookAvailable: function(isFacebookAvailable) {
         this.$.facebookLogin.style.visibility = isFacebookAvailable ? 'visible' : 'hidden';
       },
@@ -109,7 +115,7 @@
        *
        * @private
        */
-      _loginWithCreds: function(){
+      _loginWithCreds: function() {
         this.fire('login', this.creds);
       },
 
