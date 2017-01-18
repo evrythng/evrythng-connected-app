@@ -5,6 +5,10 @@ It was built with Web Components + Polymer + Material Design.
 
 All requests are done locally if there is an EVRYTHNG THNGHUB in the network and its address is configured correctly in the application.
 
+## Demo
+
+A demo version of this Web app is deployed on: http://connected-demo.evrythng.com/
+
 ## Setup
 
 ### Prerequisites
