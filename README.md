@@ -14,6 +14,15 @@ For this app to work you'll need:
 - To have created an EVRYTHNG App in your account
 - Have either Facebook login activated for your EVRYTHNG app, or a valid App User's credentials (email + password)
 
+### Demo
+
+A demo version of this Web app is deployed on: https://connected-demo.evrythng.com/
+or scan:
+
+![Alt text](https://tn.gg/jEXRpN43.qr)
+
+Note that you'll be prompted for a valid EVRYTHNG Tusted App Key.
+
 ### Changing the THNGHUB Address
 
 Go to Settings and change the 'Local Hub Address' setting. This will be persisted locally, so the next time you open the application it will use that address by default.
