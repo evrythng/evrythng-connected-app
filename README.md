@@ -60,13 +60,16 @@ You can deploy the app on any server such as GitHub pages but here are some exam
 
 ### To Netlify
 1. Login at netlify.com
-2. go to [dashboard](https://app.netlify.com/)
-3. click 'add a new project'
-4. choose 'github'
-5. select forked 'evrythng-webapp'
-6. fill the fields: branch: `master`, public folder: `build/bundled`, build cmd: `npm i polymer-cli -g && polymer build`
-7. Click 'create'
-8. Wait till first build is finished
-9. Enjoy and redeploy on every push to master
+2. Go to the Netlify [dashboard](https://app.netlify.com/)
+3. Click 'Add a new project'
+4. Choose 'GitHub'
+5. Select the forked 'evrythng-connected-app' repository
+6. Fill in the following fields: 
+  - branch: `master` 
+  - public folder: `build/bundled`
+  - build command: `npm i polymer-cli -g && polymer build`
+7. Click 'Create'
+8. Wait until first build is finished
+9. Enjoy and redeploy on every push to `master`
 
 
