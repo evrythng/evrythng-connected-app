@@ -21,7 +21,7 @@ or scan:
 
 ![Alt text](https://tn.gg/jEXRpN43.qr)
 
-Note that you'll be prompted for a valid EVRYTHNG Tusted App Key.
+Note that you'll be prompted for a valid EVRYTHNG Trusted App Key.
 
 ### Changing the THNGHUB Address
 
