@@ -4,10 +4,12 @@
   "description": "This project is a sample mobile web app that interacts with connected products using the [EVRYTHNG API](https://developers.evrythng.com/) as well as the [THNGHUB](https://developers.evrythng.com/docs/thng-hub) local gateway.  It was built with Web Components + Polymer + Material Design.",
   "main": "service-worker.js",
   "devDependencies": {
-    "polymer-cli": "^1.5.7"
+    "polymer-cli": "^0.17.0"
   },
   "scripts": {
+    "build": "npm i polymer-cli@0.17.0 && polymer build",
     "serve": "polymer serve"
   },
-  "author": ""
+  "author": "",
+  "dependencies": {}
 }
